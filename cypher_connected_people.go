@@ -58,7 +58,7 @@ func neoReadStructToConnectedPeople(neo *[]neoConnectedPeopleReadStruct, env str
 	connectedPeople := []ConnectedPerson{}
 	for _, neoCP := range *neo {
 		var connectedPerson = ConnectedPerson{}
-		connectedPerson.Person.APIURL = mapper.APIURL(neoCP.UUID, []string{"People"}, env)
+		connectedPerson.Person.APIURL = mapper.APIURL(neoCP.UUID, []string{"person"}, env)
 		connectedPerson.Person.ID = mapper.IDURL(neoCP.UUID)
 		connectedPerson.Person.PrefLabel = neoCP.PrefLabel
 		connectedPerson.Count = neoCP.Count
