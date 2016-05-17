@@ -14,25 +14,42 @@ paths:
   /most-mentioned-people:
     get:
       parameters:
-        - name: "Accept"
-          in: "header"
-          required: true
-          type: "string"
         - in: "body"
           name: "Empty"
           required: true
           schema:
             $ref: "#/definitions/Empty"
+        - in: "query"
+          name: "start_date"
+          required: true
+          type: string
+        - in: "query"
+          name: "end_date"
+          required: true
+          type: string
+        - in: "query"
+          name: "limit"
+          required: true
+          type: string
       responses:
         200:
           description: "200 response"
           schema:
-            $ref: "#/definitions/Empty"
+            $ref: "#/definitions/MostMentionedPeople"
           headers: {}
 
 definitions:
   Empty:
     type: "object"
+  MostMentionedPeople:
+    type: object
+    properties:
+      people:
+        type: array
+        items: 
+          $ref: "#/definitions/Person"
+      count:
+        type: integer
   Person:
     type: object
     properties:
@@ -43,4 +60,5 @@ definitions:
       prefLabel:
         type: string
       types:
-        $ref: "#/definitions/HomeAddress"
+        type: array
+        items: string
