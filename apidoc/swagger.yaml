@@ -34,6 +34,11 @@ paths:
           description: "The minimum number of connections required for a connection to appear in the list. Defaults to 5."
           required: false
           type: integer
+        - in: "query"
+          name: "mock"
+          description: "If true, will return mock data. Defaults to false."
+          required: false
+          type: boolean
       responses:
         200:
           description: "200 response"
@@ -63,6 +68,11 @@ paths:
           description: "The maximum number of mentioned people to return. Defaults to 20."
           required: false
           type: integer
+        - in: "query"
+          name: "mock"
+          description: "If true, will return mock data. Defaults to false."
+          required: false
+          type: boolean
       responses:
         200:
           description: "200 response"
