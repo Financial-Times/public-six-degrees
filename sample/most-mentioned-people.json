@@ -1,0 +1,173 @@
+{
+  "people": [
+    {
+      "id": "http://api.ft.com/things/d3276f0f-4e2f-392c-98da-4288c4444bc4",
+      "apiUrl": "http://api.ft.com/people/d3276f0f-4e2f-392c-98da-4288c4444bc4",
+      "prefLabel": "Hiroyuki Yanagi",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/ad60f5b2-4306-349d-92d8-cf9d9572a6f6",
+      "apiUrl": "http://api.ft.com/people/ad60f5b2-4306-349d-92d8-cf9d9572a6f6",
+      "prefLabel": "Martha Lane Fox",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ],
+      "labels": [
+        "Lane Fox",
+        "Martha Lane Fox"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/89c12c59-c8c9-39ea-80d4-ef8cf9580b4e",
+      "apiUrl": "http://api.ft.com/people/89c12c59-c8c9-39ea-80d4-ef8cf9580b4e",
+      "prefLabel": "Tim Urquhart",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/65e6575d-6a5d-34b9-b0a9-1d87e4c23f8c",
+      "apiUrl": "http://api.ft.com/people/65e6575d-6a5d-34b9-b0a9-1d87e4c23f8c",
+      "prefLabel": "Richard C. N. Branson",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/9421d9ee-7e0f-3f7c-8adc-ded83fabdb92",
+      "apiUrl": "http://api.ft.com/people/9421d9ee-7e0f-3f7c-8adc-ded83fabdb92",
+      "prefLabel": "George Gideon Oliver Osborne",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/8138ca3f-b80d-3ef8-ad59-6a9b6ea5f15e",
+      "apiUrl": "http://api.ft.com/people/8138ca3f-b80d-3ef8-ad59-6a9b6ea5f15e",
+      "prefLabel": "Timothy Donald Cook",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/4b32d6cf-ed81-3593-b4fe-a4dd990ddcf4",
+      "apiUrl": "http://api.ft.com/people/4b32d6cf-ed81-3593-b4fe-a4dd990ddcf4",
+      "prefLabel": "Paul Lambert",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/ebb79efe-dfa2-31f6-b688-d494608ea2d6",
+      "apiUrl": "http://api.ft.com/people/ebb79efe-dfa2-31f6-b688-d494608ea2d6",
+      "prefLabel": "Jonathan P. Ive",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/9185a2a9-1545-302b-9a16-c63986b67be3",
+      "apiUrl": "http://api.ft.com/people/9185a2a9-1545-302b-9a16-c63986b67be3",
+      "prefLabel": "Boris Johnson",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/97cb6fb1-456d-3dc2-84f0-2f2174b2fdbc",
+      "apiUrl": "http://api.ft.com/people/97cb6fb1-456d-3dc2-84f0-2f2174b2fdbc",
+      "prefLabel": "Ben Jarman",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/244ed42e-3a3f-3300-96ec-ca66062dfab7",
+      "apiUrl": "http://api.ft.com/people/244ed42e-3a3f-3300-96ec-ca66062dfab7",
+      "prefLabel": "Warren Edward Buffett",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/43ccbeb0-c5ab-3ac5-a3fd-c0fb6e62ba46",
+      "apiUrl": "http://api.ft.com/people/43ccbeb0-c5ab-3ac5-a3fd-c0fb6e62ba46",
+      "prefLabel": "Donald John Trump",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/fc9817ea-41cc-31b3-bfaa-214ae3d57d88",
+      "apiUrl": "http://api.ft.com/people/fc9817ea-41cc-31b3-bfaa-214ae3d57d88",
+      "prefLabel": "Vladimir Vladimirovich Putin",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/385e9494-1f9d-3040-b47e-a19a199dac92",
+      "apiUrl": "http://api.ft.com/people/385e9494-1f9d-3040-b47e-a19a199dac92",
+      "prefLabel": "Angela Dorothea Merkel",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/94742d6c-60e1-3f27-af71-e2e29607b4b5",
+      "apiUrl": "http://api.ft.com/people/94742d6c-60e1-3f27-af71-e2e29607b4b5",
+      "prefLabel": "Benigno Simeon Cojuangco Aquino",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+
+    },
+    {
+
+    },
+    {
+
+    },
+    {
+
+    },
+    {
+        
+    }
+  ]
+}
