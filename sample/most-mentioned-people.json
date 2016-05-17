@@ -1,10 +1,38 @@
 {
-    "people": [
-        {
-            "name": "Angela Merkel"
-        },
-        {
-            "name": "Barack Obama"
-        }
-    ]
+  "people": [
+    {
+      "id": "http://api.ft.com/things/d3276f0f-4e2f-392c-98da-4288c4444bc4",
+      "apiUrl": "http://api.ft.com/people/d3276f0f-4e2f-392c-98da-4288c4444bc4",
+      "prefLabel": "Hiroyuki Yanagi",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/ad60f5b2-4306-349d-92d8-cf9d9572a6f6",
+      "apiUrl": "http://api.ft.com/people/ad60f5b2-4306-349d-92d8-cf9d9572a6f6",
+      "prefLabel": "Martha Lane Fox",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ],
+      "labels": [
+        "Lane Fox",
+        "Martha Lane Fox"
+      ]
+    },
+    {
+      "id": "http://api.ft.com/things/4b32d6cf-ed81-3593-b4fe-a4dd990ddcf4",
+      "apiUrl": "http://api.ft.com/people/4b32d6cf-ed81-3593-b4fe-a4dd990ddcf4",
+      "prefLabel": "Paul Lambert",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
+    }
+  ]
 }
