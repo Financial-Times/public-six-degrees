@@ -11,28 +11,28 @@ consumes:
 produces:
   - "application/json"
 paths:
-  /connected-people:
+  /connectedPeople/{uuid}:
     get:
       parameters:
-        - in: "query"
-          name: "id"
+        - in: "path"
+          name: "uuid"
           description: "The UUID of the person we want to query."
           type: "string"
           required: true
         - in: "query"
-          name: "start_date"
+          name: "fromDate"
           description: "Start date, in YYYYMMDD format. Defaults to one week ago."
           required: false
           type: string
         - in: "query"
-          name: "end_date"
+          name: "toDate"
           description: "End date, in YYYYMMDD format. Defaults to today."
           required: false
           type: string
         - in: "query"
-          name: "limit"
-          description: "The maximum number of connections to return. Defaults to 10."
-          required: true
+          name: "minimumConnections"
+          description: "The minimum number of connections required for a connection to appear in the list. Defaults to 5."
+          required: false
           type: integer
       responses:
         200:
@@ -40,7 +40,7 @@ paths:
           schema:
             $ref: "#/definitions/ConnectedPeople"
           headers: {}
-  /most-mentioned-people:
+  /mostMentionedPeople:
     get:
       parameters:
         - in: "body"
@@ -49,13 +49,13 @@ paths:
           schema:
             $ref: "#/definitions/Empty"
         - in: "query"
-          name: "start_date"
+          name: "fromDate"
           description: "Start date, in YYYYMMDD format. Defaults to one week ago."
           required: true
           type: string
         - in: "query"
-          name: "end_date"
-          description: "Start date, in YYYYMMDD format. Defaults to one week ago."
+          name: "toDate"
+          description: "End date, in YYYYMMDD format. Defaults to today."
           required: true
           type: string
         - in: "query"
