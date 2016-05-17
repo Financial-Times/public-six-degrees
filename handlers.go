@@ -7,6 +7,9 @@ import (
 	"github.com/Financial-Times/go-fthealth/v1a"
 	//"github.com/gorilla/mux"
 	//"net/url"
+	"net/url"
+	//"strconv"
+	//"encoding/json"
 )
 
 // PeopleDriver for cypher queries
@@ -103,68 +106,56 @@ func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 // GetPerson is the public API
 func GetConnectedPeople(w http.ResponseWriter, r *http.Request) {
 
-	//m, _ := url.ParseQuery(r.URL.RawQuery)
+	m, _ := url.ParseQuery(r.URL.RawQuery)
 
-	//_, minimumConnectionsParam := m["minimumConnections"]
-	//_, fromDateParam := m["fromDate"]
-	//_, toDateParam := m["toDate"]
-	//_, limitParam := m["limit"]
-	//_, mockParam := m["mock"]
+	minimumConnectionsParam := m.Get("minimumConnections")
+	limitParam := m.Get("limit")
+	//fromDateParam := m.Get("fromDate")
+	//toDateParam := m.Get("toDate")
+	mockParam := m.Get("mock")
 
-	//if minimumConnectionsParam == "" {
-	//	minimumConnectionsParam = "5"
-	//}
+	if minimumConnectionsParam == "" {
+		minimumConnectionsParam = "5"
+	}
 
-	//if limitParam == "" {
-	//	limitParam = "10"
-	//}
+	if limitParam == "" {
+		limitParam = "10"
+	}
 
-	//if mockParam == "" {
-	//	mockParam = "false"
-	//}
+	if mockParam == "" {
+		mockParam = "false"
+	}
 
-	//minimumConnections, err := strconv.ParseInt(minimumConnectionsParam, 10, 64)
-	//limit, err := strconv.ParseInt(limitParam, 10, 64)
-	//mock, err := strconv.ParseBool(mockParam)
 	// TODO parse fromDate and toDate into data objects
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 
+	//minimumConnections, err := strconv.ParseInt(minimumConnectionsParam, 10, 64)
 	//if err != nil {
 	//	w.WriteHeader(http.StatusInternalServerError)
 	//	// TODO: Check this
 	//	//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
 	//	return
 	//}
-	//
-	//y, err := strconv.ParseInt(timePeriod, 10, 64)
-	//
+
+	//limit, err := strconv.ParseInt(limitParam, 10, 64)
 	//if err != nil {
 	//	w.WriteHeader(http.StatusInternalServerError)
 	//	// TODO: Check this
 	//	//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
 	//	return
 	//}
-	//
-	//thing, found, err := SixDegreesDriver.MostMentioned(x, y)
+
+	//mock, err := strconv.ParseBool(mockParam)
 	//if err != nil {
 	//	w.WriteHeader(http.StatusInternalServerError)
 	//	// TODO: Check this
 	//	//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
 	//	return
 	//}
-	//if !found {
-	//	w.WriteHeader(http.StatusNotFound)
-	//	w.Write([]byte(`{"message":"Nothing found."}`))
-	//	return
-	//}
-	//
-	//w.Header().Set("Cache-Control", CacheControlHeader)
-	//w.WriteHeader(http.StatusOK)
-	//
-	//if err = json.NewEncoder(w).Encode(thing); err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	w.Write([]byte(`{"message":"Person could not be retrieved, err=` + err.Error() + `"}`))
-	//}
+
+	w.Header().Set("Cache-Control", CacheControlHeader)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"message": "hello world"}`))
 }
