@@ -80,8 +80,10 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 		"Checks for accessing neo4j", people.HealthCheck()))
 
 	// Then API specific ones: TODO
-	servicesRouter.HandleFunc("/sixdegrees/", GetMostMentionedPeople).Methods("GET")
-	//	servicesRouter.HandleFunc("/people/{uuid}", people.MethodNotAllowedHandler)
+	servicesRouter.HandleFunc("/sixdegrees/connectedPeople", GetConnectedPeople).Methods("GET")
+	servicesRouter.HandleFunc("/sixdegrees/mostMentionedPeople", GetMostMentionedPeople).Methods("GET")
+
+	//servicesRouter.HandleFunc("/people/{uuid}", people.MethodNotAllowedHandler)
 
 	var monitoringRouter http.Handler = servicesRouter
 	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
