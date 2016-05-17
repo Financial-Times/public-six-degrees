@@ -41,13 +41,13 @@ func (pcw CypherDriver) CheckConnectivity() error {
 }
 
 type neoMentionsReadStruct struct {
-	UUID     string `json:"uuid"`
-	prefLabel   string `json:"prefLabel"`
-	mentions int    `json:"mentions"`
+	UUID      string `json:"uuid"`
+	PrefLabel string `json:"prefLabel"`
+	Mentions  int    `json:"mentions"`
 }
 
 func (pcw CypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, limit int) (thingList []Thing, found bool, err error) {
-	log.Infof("logging fromDate:%v toDate:%v  limit:%v",fromDateEpoch, toDateEpoch, limit)
+	log.Infof("logging fromDate:%v toDate:%v  limit:%v", fromDateEpoch, toDateEpoch, limit)
 	results := []neoMentionsReadStruct{}
 	query := &neoism.CypherQuery{
 		Statement: `MATCH (c:Content)-[a:MENTIONS]->(p:Person)
@@ -77,12 +77,13 @@ func (pcw CypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, li
 }
 
 func neoReadStructToMentionPeople(neo *[]neoMentionsReadStruct, limit int, env string) (peopleList []Thing, err error) {
-	peopleList = make([]Thing, limit + 1)
+	peopleList = []Thing{}
 	for _, neoCon := range *neo {
 		log.Infof("neoCon result: %v", neoCon)
 		var thing = Thing{}
 		thing.ID = mapper.IDURL(neoCon.UUID)
-		thing.PrefLabel = neoCon.prefLabel
+		thing.APIURL = mapper.APIURL(neoCon.UUID, []string{"person"}, env)
+		thing.PrefLabel = neoCon.PrefLabel
 		peopleList = append(peopleList, thing)
 	}
 	return peopleList, nil
