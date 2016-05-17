@@ -6,11 +6,9 @@ type Thing struct {
 	PrefLabel string `json:"prefLabel,omitempty"`
 }
 
-type People struct {
-	People []Thing `json:"people"`
-}
+type People []Thing
 
 type ConnectedPerson struct {
 	Person Thing `json:"person"`
-	Count int `json:"count"`
+	Count  int   `json:"count"`
 }
