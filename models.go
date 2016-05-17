@@ -10,10 +10,6 @@ type People struct {
 	People []Thing `json:"people"`
 }
 
-type ConnectedPeople struct {
-	People []ConnectedPerson `json:"connections"`
-}
-
 type ConnectedPerson struct {
 	Person Thing `json:"person"`
 	Count int `json:"count"`

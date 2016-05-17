@@ -48,11 +48,6 @@ paths:
   /mostMentionedPeople:
     get:
       parameters:
-        - in: "body"
-          name: "Empty"
-          required: true
-          schema:
-            $ref: "#/definitions/Empty"
         - in: "query"
           name: "fromDate"
           description: "Start date, in YYYYMMDD format. Defaults to one week ago."
@@ -81,31 +76,21 @@ paths:
           headers: {}
 
 definitions:
-  Empty:
-    type: "object"
   ConnectedPeople:
-    type: object
-    properties:
-      connections:
-        type: array
-        items:
-          $ref: "#/definitions/ConnectedPerson"
+    type: array
+    items:
+      $ref: "#/definitions/ConnectedPerson"
   ConnectedPerson:
     type: object
     properties:
-      count:
-        type: integer
       person:
         $ref: "#/definitions/Person"
-  MostMentionedPeople:
-    type: object
-    properties:
-      people:
-        type: array
-        items: 
-          $ref: "#/definitions/Person"
       count:
         type: integer
+  MostMentionedPeople:
+    type: array
+    items:
+      $ref: "#/definitions/Person"
   Person:
     type: object
     properties:

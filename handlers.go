@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"time"
 	log "github.com/Sirupsen/logrus"
+	"strconv"
 )
 
 // PeopleDriver for cypher queries
@@ -113,7 +114,7 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	limitParam := m.Get("limit")
 	fromDateParam := m.Get("fromDate")
 	toDateParam := m.Get("toDate")
-	mockParam := m.Get("mock")
+	//mockParam := m.Get("mock")
 	//uuid := vars["uuid"]
 	uuid := m.Get("uuid")
 
@@ -125,9 +126,9 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 		limitParam = "10"
 	}
 
-	if mockParam == "" {
-		mockParam = "false"
-	}
+	//if mockParam == "" {
+	//	mockParam = "false"
+	//}
 
 	// TODO parse fromDate and toDate into data objects
 
@@ -138,21 +139,21 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	toDate, _ := convertAnnotatedDateToEpoch(toDateParam)
 	log.Infof("%d to %d\n", fromDate, toDate)
 
-	//minimumConnections, err := strconv.ParseInt(minimumConnectionsParam, 10, 64)
-	//if err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	// TODO: Check this
-	//	//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
-	//	return
-	//}
+	minimumConnections, err := strconv.ParseInt(minimumConnectionsParam, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		// TODO: Check this
+		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
+		return
+	}
 
-	//limit, err := strconv.ParseInt(limitParam, 10, 64)
-	//if err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	// TODO: Check this
-	//	//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
-	//	return
-	//}
+	limit, err := strconv.ParseInt(limitParam, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		// TODO: Check this
+		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
+		return
+	}
 
 	//mock, err := strconv.ParseBool(mockParam)
 	//if err != nil {
@@ -161,6 +162,9 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	//	//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
 	//	return
 	//}
+
+	connectedPeople, _, _ := SixDegreesDriver.ConnectedPeople(uuid, fromDate, toDate, limit, minimumConnections)
+
 
 	samplePerson1 := Thing{"id " + uuid, "apiurl", "Angela Merkel"}
 	samplePerson2 := Thing{"id " + uuid, "apiurl", "David Cameron"}
