@@ -1,3 +1,14 @@
-# Public Six Degrees
+Public Six Degrees
+==================
 
-TODO: EVERYTHING!
+API
+---
+
+    GET /most-mentioned-people
+
+
+
+TODO
+----
+
+1. EVERYTHING!
