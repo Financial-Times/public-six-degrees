@@ -11,6 +11,35 @@ consumes:
 produces:
   - "application/json"
 paths:
+  /connected-people:
+    get:
+      parameters:
+        - in: "query"
+          name: "id"
+          description: "The UUID of the person we want to query."
+          type: "string"
+          required: true
+        - in: "query"
+          name: "start_date"
+          description: "Start date, in YYYYMMDD format. Defaults to one week ago."
+          required: false
+          type: string
+        - in: "query"
+          name: "end_date"
+          description: "End date, in YYYYMMDD format. Defaults to today."
+          required: false
+          type: string
+        - in: "query"
+          name: "limit"
+          description: "The maximum number of connections to return. Defaults to 10."
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/ConnectedPeople"
+          headers: {}
   /most-mentioned-people:
     get:
       parameters:
@@ -21,16 +50,19 @@ paths:
             $ref: "#/definitions/Empty"
         - in: "query"
           name: "start_date"
+          description: "Start date, in YYYYMMDD format. Defaults to one week ago."
           required: true
           type: string
         - in: "query"
           name: "end_date"
+          description: "Start date, in YYYYMMDD format. Defaults to one week ago."
           required: true
           type: string
         - in: "query"
           name: "limit"
-          required: true
-          type: string
+          description: "The maximum number of mentioned people to return. Defaults to 20."
+          required: false
+          type: integer
       responses:
         200:
           description: "200 response"
@@ -41,6 +73,20 @@ paths:
 definitions:
   Empty:
     type: "object"
+  ConnectedPeople:
+    type: object
+    properties:
+      connections:
+        type: array
+        items:
+          $ref: "#/definitions/ConnectedPerson"
+  ConnectedPerson:
+    type: object
+    properties:
+      count:
+        type: integer
+      person:
+        $ref: "#/definitions/Person"
   MostMentionedPeople:
     type: object
     properties:
@@ -61,4 +107,5 @@ definitions:
         type: string
       types:
         type: array
-        items: string
+        items:
+          type: string
