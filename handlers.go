@@ -10,6 +10,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"time"
+	log "github.com/Sirupsen/logrus"
 )
 
 // PeopleDriver for cypher queries
@@ -154,7 +155,7 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 
 	fromDate, _ := convertAnnotatedDateToEpoch(fromDateParam)
 	toDate, _ := convertAnnotatedDateToEpoch(toDateParam)
-	fmt.Printf("%d to %d\n", fromDate, toDate)
+	log.Infof("%d to %d\n", fromDate, toDate)
 
 	//minimumConnections, err := strconv.ParseInt(minimumConnectionsParam, 10, 64)
 
