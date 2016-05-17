@@ -97,7 +97,7 @@ func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 	// Defaulting to a week ago
 	if toDate == "" {
 		log.Infof("No toDate supplied therefore defaulting to week ago")
-		toDateEpoch = time.Now().AddDate(0, 0, -7).Unix()
+		toDateEpoch = time.Now().Unix()
 	} else {
 		toDateEpoch, _ = convertAnnotatedDateToEpoch(toDate)
 	}
@@ -198,7 +198,6 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	//}
 
 	connectedPeople, _, _ := SixDegreesDriver.ConnectedPeople(uuid, fromDate, toDate, limit, minimumConnections)
-
 
 	//samplePerson1 := Thing{"id " + uuid, "apiurl", "Angela Merkel"}
 	//samplePerson2 := Thing{"id " + uuid, "apiurl", "David Cameron"}
