@@ -7,10 +7,11 @@ import (
 
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/gorilla/mux"
+	"strconv"
 )
 
 // PeopleDriver for cypher queries
-var PeopleDriver Driver
+var SixDegreesDriver Driver
 var CacheControlHeader string
 
 //var maxAge = 24 * time.Hour
@@ -18,7 +19,7 @@ var CacheControlHeader string
 // HealthCheck does something
 func HealthCheck() v1a.Check {
 	return v1a.Check{
-		BusinessImpact: "Unable to respond to Public People api requests",
+		BusinessImpact: "Unable to respond to Public Six Degree",
 		Name:           "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
 		PanicGuide:     "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/public-people-api",
 		Severity:       1,
@@ -30,7 +31,7 @@ func HealthCheck() v1a.Check {
 
 // Checker does more stuff
 func Checker() (string, error) {
-	err := PeopleDriver.CheckConnectivity()
+	err := SixDegreesDriver.CheckConnectivity()
 	if err == nil {
 		return "Connectivity to neo4j is ok", err
 	}
@@ -62,31 +63,53 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetPerson is the public API
-func GetPerson(w http.ResponseWriter, r *http.Request) {
+func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	uuid := vars["uuid"]
+	numberOfMostMentioned := vars["mostMentioned"]
+	timePeriod := vars["timePeriod"]
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	if uuid == "" {
-		http.Error(w, "uuid required", http.StatusBadRequest)
-		return
+
+	// Defaulting most mentioned amount to 20
+	if numberOfMostMentioned == "" {
+		numberOfMostMentioned = "20"
 	}
-	person, found, err := PeopleDriver.Read(uuid)
+
+	x, err := strconv.ParseInt(numberOfMostMentioned, 10, 64)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message": "` + err.Error() + `"}`))
+		// TODO: Check this
+		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
+		return
+	}
+
+	y, err := strconv.ParseInt(timePeriod, 10, 64)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		// TODO: Check this
+		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
+		return
+	}
+
+	thing, found, err := SixDegreesDriver.MostMentioned(x, y)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		// TODO: Check this
+		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
 		return
 	}
 	if !found {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"message":"Person not found."}`))
+		w.Write([]byte(`{"message":"Nothing found."}`))
 		return
 	}
 
 	w.Header().Set("Cache-Control", CacheControlHeader)
 	w.WriteHeader(http.StatusOK)
 
-	if err = json.NewEncoder(w).Encode(person); err != nil {
+	if err = json.NewEncoder(w).Encode(thing); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"Person could not be retrieved, err=` + err.Error() + `"}`))
 	}
