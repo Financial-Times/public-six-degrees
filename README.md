@@ -33,6 +33,15 @@ TODO
 1. EVERYTHING!
 
 
+Installation
+------------
+
+This is what we did to get the machine running in "production":
+
+    ssh ftaps64256-law1a-eu-t.
+    sudo yum install git go
+
+
 References
 ----------
 

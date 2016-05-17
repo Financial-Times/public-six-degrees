@@ -7,6 +7,7 @@ import (
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"net/url"
 	"encoding/json"
+	"time"
 )
 
 // PeopleDriver for cypher queries
@@ -109,8 +110,8 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 
 	minimumConnectionsParam := m.Get("minimumConnections")
 	limitParam := m.Get("limit")
-	//fromDateParam := m.Get("fromDate")
-	//toDateParam := m.Get("toDate")
+	fromDateParam := m.Get("fromDate")
+	toDateParam := m.Get("toDate")
 	mockParam := m.Get("mock")
 	//uuid := vars["uuid"]
 	uuid := m.Get("uuid")
@@ -131,6 +132,10 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
+
+	fromDate, _ := convertAnnotatedDateToEpoch(fromDateParam)
+	toDate, _ := convertAnnotatedDateToEpoch(toDateParam)
+	fmt.Printf("%d to %d\n", fromDate, toDate)
 
 	//minimumConnections, err := strconv.ParseInt(minimumConnectionsParam, 10, 64)
 	//if err != nil {
@@ -167,3 +172,14 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	//w.Write([]byte(`{"message": "hello world", "uuid": "` + uuid + `"}`))
 	json.NewEncoder(w).Encode(sampleConnectedPersonSlice)
 }
+
+func convertAnnotatedDateToEpoch(annotatedDateString string) (int64, error) {
+	datetimeEpoch, err := time.Parse("2006-01-02", annotatedDateString)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return datetimeEpoch.Unix(), nil
+}
+
