@@ -5,11 +5,8 @@ import (
 	"net/http"
 
 	"github.com/Financial-Times/go-fthealth/v1a"
-	//"github.com/gorilla/mux"
-	//"net/url"
 	"net/url"
-	//"strconv"
-	//"encoding/json"
+	"encoding/json"
 )
 
 // PeopleDriver for cypher queries
@@ -104,15 +101,19 @@ func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetPerson is the public API
-func GetConnectedPeople(w http.ResponseWriter, r *http.Request) {
+func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 
-	m, _ := url.ParseQuery(r.URL.RawQuery)
+	//vars := mux.Vars(request)
+
+	m, _ := url.ParseQuery(request.URL.RawQuery)
 
 	minimumConnectionsParam := m.Get("minimumConnections")
 	limitParam := m.Get("limit")
 	//fromDateParam := m.Get("fromDate")
 	//toDateParam := m.Get("toDate")
 	mockParam := m.Get("mock")
+	//uuid := vars["uuid"]
+	uuid := m.Get("uuid")
 
 	if minimumConnectionsParam == "" {
 		minimumConnectionsParam = "5"
@@ -155,7 +156,14 @@ func GetConnectedPeople(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
+	samplePerson1 := Thing{"id " + uuid, "apiurl", "Angela Merkel"}
+	samplePerson2 := Thing{"id " + uuid, "apiurl", "David Cameron"}
+	sampleConnectedPerson1 := ConnectedPerson{samplePerson1, 534}
+	sampleConnectedPerson2 := ConnectedPerson{samplePerson2, 54}
+	sampleConnectedPersonSlice := []ConnectedPerson{sampleConnectedPerson1, sampleConnectedPerson2}
+	//sampleConnectedPeople := ConnectedPeople{sampleConnectedPersonSlice}
 	w.Header().Set("Cache-Control", CacheControlHeader)
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "hello world"}`))
+	//w.Write([]byte(`{"message": "hello world", "uuid": "` + uuid + `"}`))
+	json.NewEncoder(w).Encode(sampleConnectedPersonSlice)
 }
