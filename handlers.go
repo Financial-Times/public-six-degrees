@@ -1,15 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/Financial-Times/go-fthealth/v1a"
-	"github.com/gorilla/mux"
-	"net/url"
-	"strconv"
-	"net/url"
+	//"github.com/gorilla/mux"
+	//"net/url"
 )
 
 // PeopleDriver for cypher queries
@@ -66,69 +63,69 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetPerson is the public API
 func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	m, _ := url.ParseQuery(r.URL.RawQuery)
-
-	_, limit := m["limit"]
-	_, fromDate := m["fromDate"]
-	_, toDate := m["toDate"]
+	//vars := mux.Vars(r)
+	//
+	//m, _ := url.ParseQuery(r.URL.RawQuery)
+	//
+	//_, limit := m["limit"]
+	//_, fromDate := m["fromDate"]
+	//_, toDate := m["toDate"]
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Defaulting most mentioned amount to 20
-	if limit == "" {
-		limit = "20"
-	}
+	//if limit == "" {
+	//	limit = "20"
+	//}
 
-	thing, found, err := SixDegreesDriver.MostMentioned(fromDate, toDate, limit)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		// TODO: Check this
-		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
-		return
-	}
-	if !found {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"message":"Nothing found."}`))
-		return
-	}
+	//thing, found, err := SixDegreesDriver.MostMentioned(fromDate, toDate, limit)
+	//if err != nil {
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	// TODO: Check this
+	//	//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
+	//	return
+	//}
+	//if !found {
+	//	w.WriteHeader(http.StatusNotFound)
+	//	w.Write([]byte(`{"message":"Nothing found."}`))
+	//	return
+	//}
 
 	w.Header().Set("Cache-Control", CacheControlHeader)
 	w.WriteHeader(http.StatusOK)
 
-	if err = json.NewEncoder(w).Encode(thing); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message":"Person could not be retrieved, err=` + err.Error() + `"}`))
-	}
+	//if err = json.NewEncoder(w).Encode(thing); err != nil {
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	w.Write([]byte(`{"message":"Person could not be retrieved, err=` + err.Error() + `"}`))
+	//}
 }
 
 // GetPerson is the public API
 func GetConnectedPeople(w http.ResponseWriter, r *http.Request) {
 
-	m, _ := url.ParseQuery(r.URL.RawQuery)
+	//m, _ := url.ParseQuery(r.URL.RawQuery)
 
-	_, minimumConnectionsParam := m["minimumConnections"]
-	_, fromDateParam := m["fromDate"]
-	_, toDateParam := m["toDate"]
-	_, limitParam := m["limit"]
-	_, mockParam := m["mock"]
+	//_, minimumConnectionsParam := m["minimumConnections"]
+	//_, fromDateParam := m["fromDate"]
+	//_, toDateParam := m["toDate"]
+	//_, limitParam := m["limit"]
+	//_, mockParam := m["mock"]
 
-	if minimumConnectionsParam == "" {
-		minimumConnectionsParam = "5"
-	}
+	//if minimumConnectionsParam == "" {
+	//	minimumConnectionsParam = "5"
+	//}
 
-	if limitParam == "" {
-		limitParam = "10"
-	}
+	//if limitParam == "" {
+	//	limitParam = "10"
+	//}
 
-	if mockParam == "" {
-		mockParam = "false"
-	}
+	//if mockParam == "" {
+	//	mockParam = "false"
+	//}
 
-	minimumConnections, err := strconv.ParseInt(minimumConnectionsParam, 10, 64)
-	limit, err := strconv.ParseInt(limitParam, 10, 64)
-	mock, err := strconv.ParseBool(mockParam)
+	//minimumConnections, err := strconv.ParseInt(minimumConnectionsParam, 10, 64)
+	//limit, err := strconv.ParseInt(limitParam, 10, 64)
+	//mock, err := strconv.ParseBool(mockParam)
 	// TODO parse fromDate and toDate into data objects
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

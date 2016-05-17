@@ -71,7 +71,7 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 		log.Fatalf("Error connecting to neo4j %s", err)
 	}
 
-	SixDegreesDriver = NewCypherDriver(db, env)
+	//SixDegreesDriver = NewCypherDriver(db, env)
 
 	servicesRouter := mux.NewRouter()
 
