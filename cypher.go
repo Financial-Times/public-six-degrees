@@ -8,7 +8,7 @@ import (
 
 // Driver interface
 type Driver interface {
-	MostMentioned(fromDate string, toDate string, limit int64) (thing Thing, found bool, err error)
+	MostMentioned(fromDateEpoch int64, toDateEpoch int64, limit int) (thingList People, found bool, err error)
 	CheckConnectivity() error
 }
 
@@ -40,33 +40,33 @@ func (pcw CypherDriver) CheckConnectivity() error {
 type neoReadStruct struct {
 }
 
-func (pcw CypherDriver) MostMentioned(numberOfMostMentioned int64, timePeriod int64) (Thing, bool, error) {
-	thing := Thing{}
+func (pcw CypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, limit int) (thingList People, found bool, err error) {
+	people := People{}
 	results := []struct {
 		Rs []neoReadStruct
 	}{}
 	query := &neoism.CypherQuery{
 		Statement:  ``,
-		Parameters: neoism.Props{"x": numberOfMostMentioned, "y": timePeriod},
+		Parameters: neoism.Props{"fromDateEpoch": fromDateEpoch, "toDateEpoch": toDateEpoch, "mentionsLimit": limit},
 		Result:     &results,
 	}
 
-	err := pcw.db.Cypher(query)
+	err = pcw.db.Cypher(query)
 	if err != nil {
-		log.Errorf("Error finding %v most mentioned people in time period %v with the following statement: %v  Error: %v", numberOfMostMentioned, timePeriod, query.Statement, err)
-		return Thing{}, false, fmt.Errorf("Error finding %v most mentioned people in time period %v", numberOfMostMentioned, timePeriod)
+		log.Errorf("Error finding %v most mentioned people between %v and %v with the following statement: %v  Error: %v", limit, fromDateEpoch, toDateEpoch, query.Statement, err)
+		return People{}, false, fmt.Errorf("Error finding %v most mentioned people between %v and %v", limit, fromDateEpoch, toDateEpoch)
 	}
-	log.Debugf("CypherResult MostMentioned was (x=%v, y=%v): %+v", numberOfMostMentioned, timePeriod, results)
+	log.Debugf("CypherResult MostMentioned was (fromDate=%v, toDate=%v): %+v", limit, fromDateEpoch, toDateEpoch, results)
 	if (len(results)) == 0 || len(results[0].Rs) == 0 {
-		return Thing{}, false, nil
+		return People{}, false, nil
 	}
 
-	thing = neoReadStructToThing(results[0].Rs[0], pcw.env)
-	log.Debugf("Returning %v", thing)
-	return thing, true, nil
+	people = neoReadStructToThing(results[0].Rs[0], pcw.env)
+	log.Debugf("Returning %v", people)
+	return people, true, nil
 }
 
-func neoReadStructToThing(neo neoReadStruct, env string) Thing {
-	public := Thing{}
+func neoReadStructToThing(neo neoReadStruct, env string) People {
+	public := People{}
 	return public
 }

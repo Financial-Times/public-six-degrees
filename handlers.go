@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"encoding/json"
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"net/url"
-	"encoding/json"
+
+	"github.com/Sirupsen/logrus"
 	"time"
 )
 
@@ -64,41 +66,59 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetPerson is the public API
 func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
-	//vars := mux.Vars(r)
-	//
-	//m, _ := url.ParseQuery(r.URL.RawQuery)
-	//
-	//_, limit := m["limit"]
-	//_, fromDate := m["fromDate"]
-	//_, toDate := m["toDate"]
+	limitString := r.URL.Query().Get("limit")
+	fromDate := r.URL.Query().Get("fromDate")
+	toDate := r.URL.Query().Get("toDate")
+
+	var limit int
+	var fromDateEpoch int64
+	var toDateEpoch int64
+	var err error
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	// Defaulting most mentioned amount to 20
-	//if limit == "" {
-	//	limit = "20"
-	//}
+	//  Defaulting most mentioned limit to 20
+	if limitString == "" {
+		logrus.Infof("No limit supplied therefore defaulting to 20")
+		limit = 20
+	}
 
-	//thing, found, err := SixDegreesDriver.MostMentioned(fromDate, toDate, limit)
-	//if err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	// TODO: Check this
-	//	//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
-	//	return
-	//}
-	//if !found {
-	//	w.WriteHeader(http.StatusNotFound)
-	//	w.Write([]byte(`{"message":"Nothing found."}`))
-	//	return
-	//}
+	// Defaulting to a week ago
+	if fromDate == "" {
+		logrus.Infof("No fromDate supplied therefore defaulting to week ago")
+		fromDateEpoch = time.Now().AddDate(0, 0, -7).Unix()
+	} else {
+		fromDateEpoch, _ = convertAnnotatedDateToEpoch(fromDate)
+	}
+
+	// Defaulting to a week ago
+	if toDate == "" {
+		logrus.Infof("No toDate supplied therefore defaulting to week ago")
+		toDateEpoch = time.Now().AddDate(0, 0, -7).Unix()
+	} else {
+		toDateEpoch, _ = convertAnnotatedDateToEpoch(toDate)
+	}
+
+	people, found, err := SixDegreesDriver.MostMentioned(fromDateEpoch, toDateEpoch, limit)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		// TODO: Check this
+		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
+		return
+	}
+	if !found {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"message":"Nothing found."}`))
+		return
+	}
 
 	w.Header().Set("Cache-Control", CacheControlHeader)
 	w.WriteHeader(http.StatusOK)
 
-	//if err = json.NewEncoder(w).Encode(thing); err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	w.Write([]byte(`{"message":"Person could not be retrieved, err=` + err.Error() + `"}`))
-	//}
+	if err = json.NewEncoder(w).Encode(people); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		//w.Write([]byte(`{"message":"Person could not be retrieved, err=` + err.Error() + `"}`))
+	}
 }
 
 // GetPerson is the public API
@@ -132,12 +152,12 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-
 	fromDate, _ := convertAnnotatedDateToEpoch(fromDateParam)
 	toDate, _ := convertAnnotatedDateToEpoch(toDateParam)
 	fmt.Printf("%d to %d\n", fromDate, toDate)
 
 	//minimumConnections, err := strconv.ParseInt(minimumConnectionsParam, 10, 64)
+
 	//if err != nil {
 	//	w.WriteHeader(http.StatusInternalServerError)
 	//	// TODO: Check this
@@ -182,4 +202,3 @@ func convertAnnotatedDateToEpoch(annotatedDateString string) (int64, error) {
 
 	return datetimeEpoch.Unix(), nil
 }
-
