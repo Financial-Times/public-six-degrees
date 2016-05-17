@@ -18,10 +18,6 @@
         "http://www.ft.com/ontology/core/Thing",
         "http://www.ft.com/ontology/concept/Concept",
         "http://www.ft.com/ontology/person/Person"
-      ],
-      "labels": [
-        "Lane Fox",
-        "Martha Lane Fox"
       ]
     },
     {
@@ -155,19 +151,54 @@
       ]
     },
     {
-
+      "id": "http://api.ft.com/things/f831c99f-7daa-39c2-a38a-510e1824e0e9",
+      "apiUrl": "http://api.ft.com/people/f831c99f-7daa-39c2-a38a-510e1824e0e9",
+      "prefLabel": "Daniel Vernazza",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
     },
     {
-
+      "id": "http://api.ft.com/things/8bac9825-7bf8-389e-95ba-9eaeb8d17d27",
+      "apiUrl": "http://api.ft.com/people/8bac9825-7bf8-389e-95ba-9eaeb8d17d27",
+      "prefLabel": "Michael James Wallace Ashley",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
     },
     {
-
+      "id": "http://api.ft.com/things/af717b6f-f56c-33d4-b0a5-5968ad45d820",
+      "apiUrl": "http://api.ft.com/people/af717b6f-f56c-33d4-b0a5-5968ad45d820",
+      "prefLabel": "Christine Lagarde",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
     },
     {
-
+      "id": "http://api.ft.com/things/6a9ae459-8382-33cd-b10a-ecf3110b4e6c",
+      "apiUrl": "http://api.ft.com/people/6a9ae459-8382-33cd-b10a-ecf3110b4e6c",
+      "prefLabel": "Jin Ping Xi",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
     },
     {
-        
+      "id": "http://api.ft.com/things/ebd8c1ee-7033-3d9a-828b-c95bd1c6f407",
+      "apiUrl": "http://api.ft.com/people/ebd8c1ee-7033-3d9a-828b-c95bd1c6f407",
+      "prefLabel": "Mao Zedong",
+      "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/person/Person"
+      ]
     }
   ]
 }
