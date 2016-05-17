@@ -21,6 +21,13 @@ Getting Started
 
 3. Visit: [http://localhost:8080/sixdegrees/connectedPeople](http://localhost:8080/sixdegrees/connectedPeople)
 
+
+Sample queries
+--------------
+
+    curl http://localhost:8080/sixdegrees/connectedPeople?uuid=36c6124-24c0-39fe-9172-d37c60eafdeg&fromDate=2016-05-17&toDate=2016-05-18
+
+
 API
 ---
 
