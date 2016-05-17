@@ -40,14 +40,19 @@ TODO
 1. EVERYTHING!
 
 
-Installation
-------------
+Test Environment
+----------------
 
-This is what we did to get the machine running in "production":
+We have a test environment running in EC2.
 
     ssh ftaps64256-law1a-eu-t.
     sudo yum install git go
 
+    dig sixdegrees-demo.in.ft.com
+    ...
+    sixdegrees-demo.in.ft.com. 3600	IN	CNAME	ftaps64256-law1a-eu-t.osb.ft.com.
+
+    curl http://sixdegrees-demo.in.ft.com:8080/sixdegrees/connectedPeople?uuid=dc278df2-1c8b-3e44-8ca8-5d255f75f737&fromDate=2014-01-01&toDate=2016-05-17&minimumConnections=1
 
 References
 ----------
