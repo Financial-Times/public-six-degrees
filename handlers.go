@@ -7,6 +7,7 @@ import (
 
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/gorilla/mux"
+	"net/url"
 	"strconv"
 )
 
@@ -65,35 +66,21 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 // GetPerson is the public API
 func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	numberOfMostMentioned := vars["mostMentioned"]
-	timePeriod := vars["timePeriod"]
+
+	m, _ := url.ParseQuery(r.URL.RawQuery)
+
+	_, limit := m["limit"]
+	_, fromDate := m["fromDate"]
+	_, toDate := m["toDate"]
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Defaulting most mentioned amount to 20
-	if numberOfMostMentioned == "" {
-		numberOfMostMentioned = "20"
+	if limit == "" {
+		limit = "20"
 	}
 
-	x, err := strconv.ParseInt(numberOfMostMentioned, 10, 64)
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		// TODO: Check this
-		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
-		return
-	}
-
-	y, err := strconv.ParseInt(timePeriod, 10, 64)
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		// TODO: Check this
-		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
-		return
-	}
-
-	thing, found, err := SixDegreesDriver.MostMentioned(x, y)
+	thing, found, err := SixDegreesDriver.MostMentioned(fromDate, toDate, limit)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		// TODO: Check this

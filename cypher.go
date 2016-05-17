@@ -8,7 +8,7 @@ import (
 
 // Driver interface
 type Driver interface {
-	MostMentioned(numberOfMostMentioned int64, timePeriod int64) (thing Thing, found bool, err error)
+	MostMentioned(fromDate string, toDate string, limit int64) (thing Thing, found bool, err error)
 	CheckConnectivity() error
 }
 
@@ -40,7 +40,7 @@ func (pcw CypherDriver) CheckConnectivity() error {
 type neoReadStruct struct {
 }
 
-func (pcw CypherDriver) MostMentioned(numberOfMostMentioned int64, timePeriod int64'') (Thing, bool, error) {
+func (pcw CypherDriver) MostMentioned(numberOfMostMentioned int64, timePeriod int64) (Thing, bool, error) {
 	thing := Thing{}
 	results := []struct {
 		Rs []neoReadStruct

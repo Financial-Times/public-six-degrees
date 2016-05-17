@@ -7,5 +7,5 @@ type Thing struct {
 }
 
 type People struct {
-    People  []Thing `json:"people"`
+	People []Thing `json:"people"`
 }
