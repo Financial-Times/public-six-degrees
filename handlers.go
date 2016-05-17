@@ -5,11 +5,12 @@ import (
 	"net/http"
 
 	"encoding/json"
-	"github.com/Financial-Times/go-fthealth/v1a"
 	"net/url"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/Financial-Times/go-fthealth/v1a"
+
 	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"strconv"
 )
@@ -81,13 +82,13 @@ func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 
 	//  Defaulting most mentioned limit to 20
 	if limitString == "" {
-		logrus.Infof("No limit supplied therefore defaulting to 20")
+		log.Infof("No limit supplied therefore defaulting to 20")
 		limit = 20
 	}
 
 	// Defaulting to a week ago
 	if fromDate == "" {
-		logrus.Infof("No fromDate supplied therefore defaulting to week ago")
+		log.Infof("No fromDate supplied therefore defaulting to week ago")
 		fromDateEpoch = time.Now().AddDate(0, 0, -7).Unix()
 	} else {
 		fromDateEpoch, _ = convertAnnotatedDateToEpoch(fromDate)
@@ -95,7 +96,7 @@ func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 
 	// Defaulting to a week ago
 	if toDate == "" {
-		logrus.Infof("No toDate supplied therefore defaulting to week ago")
+		log.Infof("No toDate supplied therefore defaulting to week ago")
 		toDateEpoch = time.Now().AddDate(0, 0, -7).Unix()
 	} else {
 		toDateEpoch, _ = convertAnnotatedDateToEpoch(toDate)
@@ -150,12 +151,26 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	//	mockParam = "false"
 	//}
 
-	// TODO parse fromDate and toDate into data objects
+	var fromDate int64
+	var toDate int64
+
+	// Defaulting to a week ago
+	if fromDateParam == "" {
+		log.Infof("No fromDate supplied therefore defaulting to week ago")
+		fromDate = time.Now().AddDate(0, 0, -7).Unix()
+	} else {
+		fromDate, _ = convertAnnotatedDateToEpoch(fromDateParam)
+	}
+
+	if toDateParam == "" {
+		log.Infof("No toDate supplied therefore defaulting to now")
+		toDate = time.Now().Unix()
+	} else {
+		toDate, _ = convertAnnotatedDateToEpoch(toDateParam)
+	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	fromDate, _ := convertAnnotatedDateToEpoch(fromDateParam)
-	toDate, _ := convertAnnotatedDateToEpoch(toDateParam)
 	log.Infof("%d to %d\n", fromDate, toDate)
 
 	minimumConnections, err := strconv.Atoi(minimumConnectionsParam)
