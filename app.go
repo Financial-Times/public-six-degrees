@@ -71,8 +71,7 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 		log.Fatalf("Error connecting to neo4j %s", err)
 	}
 
-	// TODO: Here we need a six-degrees driver
-	people.PeopleDriver = people.NewCypherDriver(db, env)
+	SixDegreesDriver = NewCypherDriver(db, env)
 
 	servicesRouter := mux.NewRouter()
 
@@ -81,7 +80,7 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 		"Checks for accessing neo4j", people.HealthCheck()))
 
 	// Then API specific ones: TODO
-	//	servicesRouter.HandleFunc("/people/{uuid}", people.GetPerson).Methods("GET")
+	servicesRouter.HandleFunc("/sixdegrees/", GetMostMentionedPeople).Methods("GET")
 	//	servicesRouter.HandleFunc("/people/{uuid}", people.MethodNotAllowedHandler)
 
 	var monitoringRouter http.Handler = servicesRouter

@@ -1,18 +1,14 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"time"
-
-	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	log "github.com/Sirupsen/logrus"
 	"github.com/jmcvetta/neoism"
 )
 
 // Driver interface
 type Driver interface {
-	//Read(id string) (person Person, found bool, err error)
+	MostMentioned(numberOfMostMentioned int64, timePeriod int64) (thing Thing, found bool, err error)
 	CheckConnectivity() error
 }
 
@@ -44,118 +40,33 @@ func (pcw CypherDriver) CheckConnectivity() error {
 type neoReadStruct struct {
 }
 
-func (pcw CypherDriver) MostMentioned(x int, y int) {
-	thing = Thing{}
+func (pcw CypherDriver) MostMentioned(numberOfMostMentioned int64, timePeriod int64) (Thing, bool, error) {
+	thing := Thing{}
 	results := []struct {
 		Rs []neoReadStruct
 	}{}
 	query := &neoism.CypherQuery{
-		Statement: `
-                        MATCH (p:Person{uuid:{uuid}})
-                        OPTIONAL MATCH (p)<-[:HAS_MEMBER]-(m:Membership)
-                        OPTIONAL MATCH (m)-[:HAS_ORGANISATION]->(o:Organisation)
-                        OPTIONAL MATCH (o)<-[rel:MENTIONS]-(c:Content)
-                        OPTIONAL MATCH (m)-[rr:HAS_ROLE]->(r:Role)
-                        WITH    p,
-                                { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, annCount:COUNT(c)} as o,
-                                { id:m.uuid, types:labels(m), prefLabel:m.prefLabel, title:m.title, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}] } as m,
-                                { id:r.uuid, types:labels(r), prefLabel:r.prefLabel, changeEvents:[{startedAt:rr.inceptionDate}, {endedAt:rr.terminationDate}] } as r
-                        WITH p, m, o, collect(r) as r ORDER BY o.annCount DESC
-                        WITH p, collect({m:m, o:o, r:r}) as m
-                        WITH m, { id:p.uuid, types:labels(p), prefLabel:p.prefLabel, labels:p.aliases} as p
-                        RETURN collect ({p:p, m:m}) as rs
-                        `,
-		Parameters: neoism.Props{"uuid": uuid},
+		Statement:  ``,
+		Parameters: neoism.Props{"x": numberOfMostMentioned, "y": timePeriod},
 		Result:     &results,
 	}
-	err = pcw.db.Cypher(query)
+
+	err := pcw.db.Cypher(query)
 	if err != nil {
-		log.Errorf("Error looking up uuid %s with query %s from neoism: %+v\n", uuid, query.Statement, err)
-		return Person{}, false, fmt.Errorf("Error accessing Person datastore for uuid: %s", uuid)
+		log.Errorf("Error finding %v most mentioned people in time period %v with the following statement: %v  Error: %v", numberOfMostMentioned, timePeriod, query.Statement, err)
+		return Thing{}, false, fmt.Errorf("Error finding %v most mentioned people in time period %v", numberOfMostMentioned, timePeriod)
 	}
-	log.Debugf("CypherResult ReadPeople for uuid: %s was: %+v", uuid, results)
+	log.Debugf("CypherResult MostMentioned was (x=%v, y=%v): %+v", numberOfMostMentioned, timePeriod, results)
 	if (len(results)) == 0 || len(results[0].Rs) == 0 {
-		return Person{}, false, nil
-	} else if len(results) != 1 && len(results[0].Rs) != 1 {
-		errMsg := fmt.Sprintf("Multiple people found with the same uuid:%s !", uuid)
-		log.Error(errMsg)
-		return Person{}, true, errors.New(errMsg)
+		return Thing{}, false, nil
 	}
-	person = neoReadStructToPerson(results[0].Rs[0], pcw.env)
-	log.Debugf("Returning %v", person)
-	return person, true, nil
+
+	thing = neoReadStructToThing(results[0].Rs[0], pcw.env)
+	log.Debugf("Returning %v", thing)
+	return thing, true, nil
 }
 
-func neoReadStructToPerson(neo neoReadStruct, env string) Person {
-	public := Person{}
-	public.Thing = &Thing{}
-	public.ID = mapper.IDURL(neo.P.ID)
-	public.APIURL = mapper.APIURL(neo.P.ID, neo.P.Types, env)
-	public.Types = mapper.TypeURIs(neo.P.Types)
-	public.PrefLabel = neo.P.PrefLabel
-	if len(neo.P.Labels) > 0 {
-		public.Labels = &neo.P.Labels
-	}
-
-	if len(neo.M) == 1 && (neo.M[0].M.ID == "") {
-		public.Memberships = make([]Membership, 0, 0)
-	} else {
-		public.Memberships = make([]Membership, len(neo.M))
-		for mIdx, neoMem := range neo.M {
-			membership := Membership{}
-			membership.Title = neoMem.M.PrefLabel
-			membership.Organisation = Organisation{}
-			membership.Organisation.Thing = &Thing{}
-			membership.Organisation.ID = mapper.IDURL(neoMem.O.ID)
-			membership.Organisation.APIURL = mapper.APIURL(neoMem.O.ID, neoMem.O.Types, env)
-			membership.Organisation.Types = mapper.TypeURIs(neoMem.O.Types)
-			membership.Organisation.PrefLabel = neoMem.O.PrefLabel
-			if len(neoMem.O.Labels) > 0 {
-				membership.Organisation.Labels = &neoMem.O.Labels
-			}
-			if a, b := changeEvent(neoMem.M.ChangeEvents); a == true {
-				membership.ChangeEvents = b
-			}
-			membership.Roles = make([]Role, len(neoMem.R))
-			for rIdx, neoRole := range neoMem.R {
-				role := Role{}
-				role.Thing = &Thing{}
-				role.ID = mapper.IDURL(neoRole.ID)
-				role.APIURL = mapper.APIURL(neoRole.ID, neoRole.Types, env)
-				role.PrefLabel = neoRole.PrefLabel
-				if a, b := changeEvent(neoRole.ChangeEvents); a == true {
-					role.ChangeEvents = b
-				}
-
-				membership.Roles[rIdx] = role
-			}
-			public.Memberships[mIdx] = membership
-		}
-	}
-	log.Debugf("neoReadStructToPerson neo: %+v result: %+v", neo, public)
+func neoReadStructToThing(neo neoReadStruct, env string) Thing {
+	public := Thing{}
 	return public
-}
-
-func changeEvent(neoChgEvts []neoChangeEvent) (bool, *[]ChangeEvent) {
-	var results []ChangeEvent
-	currentLayout := "2006-01-02T15:04:05.999Z"
-	layout := "2006-01-02T15:04:05Z"
-
-	if neoChgEvts[0].StartedAt == "" && neoChgEvts[1].EndedAt == "" {
-		results = make([]ChangeEvent, 0, 0)
-		return false, &results
-	}
-	for _, neoChgEvt := range neoChgEvts {
-		if neoChgEvt.StartedAt != "" {
-			t, _ := time.Parse(currentLayout, neoChgEvt.StartedAt)
-			results = append(results, ChangeEvent{StartedAt: t.Format(layout)})
-		}
-		if neoChgEvt.EndedAt != "" {
-			t, _ := time.Parse(layout, neoChgEvt.EndedAt)
-			results = append(results, ChangeEvent{EndedAt: t.Format(layout)})
-		}
-	}
-
-	log.Debugf("changeEvent converted: %+v result:%+v", neoChgEvts, results)
-	return true, &results
 }
