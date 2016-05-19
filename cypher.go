@@ -7,7 +7,7 @@ import (
 
 // Driver interface
 type Driver interface {
-	ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, limit int, minimumConnections int) (connectedPeople []ConnectedPerson, found bool, err error)
+	ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, limit int, minimumConnections int, contentLimit int) (connectedPeople []ConnectedPerson, found bool, err error)
 	MostMentioned(fromDateEpoch int64, toDateEpoch int64, limit int) (thingList []Thing, found bool, err error)
 	CheckConnectivity() error
 }

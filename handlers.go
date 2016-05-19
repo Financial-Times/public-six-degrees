@@ -96,10 +96,16 @@ func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 
 	// Defaulting to a week ago
 	if toDate == "" {
-		log.Infof("No toDate supplied therefore defaulting to week ago")
+		log.Infof("No toDate supplied therefore defaulting to now")
 		toDateEpoch = time.Now().Unix()
 	} else {
 		toDateEpoch, _ = convertAnnotatedDateToEpoch(toDate)
+	}
+
+	// Defaulting fromDate to a week before toDate if the toDate is earlier than fromDate
+	if (toDateEpoch < fromDateEpoch) {
+		log.Infof("toDate cannot be earlier than fromDate, defaulting fromDate to a week from toDate")
+		fromDateEpoch = time.Unix(toDateEpoch, 0).AddDate(0, 0, -7).Unix()
 	}
 
 	people, found, err := SixDegreesDriver.MostMentioned(fromDateEpoch, toDateEpoch, limit)
@@ -135,6 +141,7 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	limitParam := m.Get("limit")
 	fromDateParam := m.Get("fromDate")
 	toDateParam := m.Get("toDate")
+	contentLimitParam := m.Get("contentLimit")
 	//mockParam := m.Get("mock")
 	//uuid := vars["uuid"]
 	uuid := m.Get("uuid")
@@ -145,6 +152,11 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 
 	if limitParam == "" {
 		limitParam = "10"
+	}
+
+	if contentLimitParam == "" {
+		contentLimitParam = "3"
+		log.Infof("No contentLimit supplied, defaulting contentLimit to %s", contentLimitParam)
 	}
 
 	//if mockParam == "" {
@@ -189,6 +201,14 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	contentLimit, err := strconv.Atoi(contentLimitParam)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		// TODO: Check this
+		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
+		return
+	}
+
 	//mock, err := strconv.ParseBool(mockParam)
 	//if err != nil {
 	//	w.WriteHeader(http.StatusInternalServerError)
@@ -197,7 +217,7 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	//	return
 	//}
 
-	connectedPeople, _, _ := SixDegreesDriver.ConnectedPeople(uuid, fromDate, toDate, limit, minimumConnections)
+	connectedPeople, _, _ := SixDegreesDriver.ConnectedPeople(uuid, fromDate, toDate, limit, minimumConnections, contentLimit)
 
 	//samplePerson1 := Thing{"id " + uuid, "apiurl", "Angela Merkel"}
 	//samplePerson2 := Thing{"id " + uuid, "apiurl", "David Cameron"}
