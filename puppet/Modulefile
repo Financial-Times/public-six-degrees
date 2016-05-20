@@ -1,0 +1,11 @@
+name    'ft-public_six_degrees_api'
+version '0.0.0'
+source 'git@github.com:Financial-Times/public-six_degrees-api.git'
+author 'ft'
+license 'Apache License, Version 2.0'
+summary 'Provides a public API for the endpoints around six degrees of Angela Merkel'
+description 'Public API for retrieving information pertaining to six degrees of Angela Merkel powered by UPP V2'
+project_page 'https://github.com/Financial-Times/public-six_degrees-api'
+
+## Add dependencies, if any:
+dependency 'ft/go_service_profile', '>= 0.0.0'
