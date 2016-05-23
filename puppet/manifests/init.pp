@@ -1,4 +1,4 @@
-class public_six-degrees {
+class public_six_degrees {
 
   $configParameters = hiera('configParameters','')
 
