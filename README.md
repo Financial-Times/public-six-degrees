@@ -27,11 +27,11 @@ Sample queries
 
     curl http://sixdegrees-demo.in.ft.com/sixdegrees/connectedPeople?uuid=36c6124-24c0-39fe-9172-d37c60eafdeg&fromDate=2016-05-17&toDate=2016-05-18
     curl http://sixdegrees-demo.in.ft.com/sixdegrees/connectedPeople?uuid=dc278df2-1c8b-3e44-8ca8-5d255f75f737&fromDate=2014-01-01&toDate=2016-05-17&minimumConnections=1
-    curl http://sixdegrees-demo.in.ft.com/sixdegrees/mostMentioned?fromDate=2014-01-01&toDate=2016-05-17
-    curl http://sixdegrees-demo.in.ft.com/sixdegrees/mostMentioned?fromDate=2014-01-01&toDate=2016-05-17&limit=50
+    curl http://sixdegrees-demo.in.ft.com/sixdegrees/mostMentionedPeople?fromDate=2014-01-01&toDate=2016-05-17
+    curl http://sixdegrees-demo.in.ft.com/sixdegrees/mostMentionedPeople?fromDate=2014-01-01&toDate=2016-05-17&limit=50
     
     MostMentioned defaults to the last week and limit of 20
-    curl http://sixdegrees-demo.in.ft.com/sixdegrees/mostMentioned
+    curl http://sixdegrees-demo.in.ft.com/sixdegrees/mostMentionedPeople
 
 API
 ---
