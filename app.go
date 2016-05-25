@@ -17,6 +17,7 @@ import (
 	"github.com/jawher/mow.cli"
 	"github.com/jmcvetta/neoism"
 	"github.com/rcrowley/go-metrics"
+	"github.com/gorilla/handlers"
 )
 
 func main() {
@@ -98,7 +99,7 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 	http.HandleFunc("/__gtg", GoodToGo)
 	http.Handle("/", monitoringRouter)
 
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := http.ListenAndServe(":"+port, handlers.CORS()(monitoringRouter)); err != nil {
 		log.Fatalf("Unable to start server: %v", err)
 	}
 }
