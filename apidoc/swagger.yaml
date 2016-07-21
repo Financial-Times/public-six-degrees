@@ -39,6 +39,16 @@ paths:
           description: "If true, will return mock data. Defaults to false."
           required: false
           type: boolean
+        - in: "query"
+          name: "limit"
+          description: "Limits the number of connections returned. Defaults to 10."
+          required: false
+          type: integer
+        - in: "query"
+          name: "contentLimit"
+          description: "Limits the number of content items returned per connection. Defaults to 20. Cannot be higher than 20."
+          required: false
+          type: boolean
       responses:
         200:
           description: "200 response"
