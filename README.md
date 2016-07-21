@@ -47,10 +47,25 @@ We have a test environment running in CoCo in the semantic cluster.
 Build & Deploy
 --------------
 
-1. Tag: `git tag 0.0.x`
-1. Push: `git push origin --tags`
-1. Build: just like you would build any other CoCo service.
-1. Deploy: the same!
+1. Pull, branch, commit, push:
+
+        git checkout master
+        git pull
+        git checkout -b name-of-branch
+        git add -p
+        git commit -m "whatever"
+        git push origin
+
+1. Tag:
+
+        git tag 0.0.x
+
+1. Push:
+
+        git push origin --tags
+
+1. Build: in Docker Hub: [public-six-degrees](https://hub.docker.com/r/coco/public-six-degrees/)
+1. Deploy: create a PR for up-service-files, just like any other CoCo service.
 
 References
 ----------
