@@ -21,6 +21,8 @@ var CacheControlHeader string
 
 //var maxAge = 24 * time.Hour
 
+const MaxContentLimit = 20
+
 // HealthCheck does something
 func HealthCheck() v1a.Check {
 	return v1a.Check{
@@ -133,8 +135,6 @@ func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 // GetPerson is the public API
 func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 
-	//vars := mux.Vars(request)
-
 	m, _ := url.ParseQuery(request.URL.RawQuery)
 
 	minimumConnectionsParam := m.Get("minimumConnections")
@@ -142,8 +142,6 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	fromDateParam := m.Get("fromDate")
 	toDateParam := m.Get("toDate")
 	contentLimitParam := m.Get("contentLimit")
-	//mockParam := m.Get("mock")
-	//uuid := vars["uuid"]
 	uuid := m.Get("uuid")
 
 	if minimumConnectionsParam == "" {
@@ -155,13 +153,9 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	}
 
 	if contentLimitParam == "" {
-		contentLimitParam = "3"
+		contentLimitParam = strconv.Itoa(MaxContentLimit)
 		log.Infof("No contentLimit supplied, defaulting contentLimit to %s", contentLimitParam)
 	}
-
-	//if mockParam == "" {
-	//	mockParam = "false"
-	//}
 
 	var fromDate int64
 	var toDate int64
@@ -207,6 +201,10 @@ func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 		// TODO: Check this
 		//w.Write([]byte(`{"message": "` + err.Error() + `"}`))
 		return
+	}
+
+	if contentLimit > MaxContentLimit {
+		contentLimit = MaxContentLimit
 	}
 
 	//mock, err := strconv.ParseBool(mockParam)
