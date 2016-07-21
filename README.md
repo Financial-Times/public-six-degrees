@@ -42,19 +42,15 @@ See [swagger.yaml](apidoc/swagger.yaml).
 Test Environment
 ----------------
 
-We have a test environment running in EC2.
-
-Nodegroup: https://ftppm521-lvuk-uk-p.osb.ft.com/admin/deployments/nodegroup/279/
-
+We have a test environment running in CoCo in the semantic cluster.
 
 Build & Deploy
 --------------
 
 1. Tag: `git tag 0.0.x`
 1. Push: `git push origin --tags`
-1. Build: [public-six-degrees-api-build](http://ftjen10085-lvpr-uk-p.osb.ft.com:8181/view/JOBS-public-six-degrees-api/job/public-six-degrees-api-build/)
-1. Deploy: there are currently some problems with the Jenkins deploy job, so navigate to the nodegroup and "create a deployment"
-   from there instead.
+1. Build: just like you would build any other CoCo service.
+1. Deploy: the same!
 
 References
 ----------
