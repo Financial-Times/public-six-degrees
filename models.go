@@ -7,13 +7,13 @@ type Thing struct {
 }
 
 type Content struct {
-	ID        string `json:"id"`
-	APIURL    string `json:"apiUrl,omitempty"` // self ?
-	Title string `json:"title"`
+	ID     string `json:"id"`
+	APIURL string `json:"apiUrl,omitempty"` // self ?
+	Title  string `json:"title"`
 }
 
 type ConnectedPerson struct {
-	Person Thing `json:"person"`
-	Count  int   `json:"count"`
+	Person  Thing     `json:"person"`
+	Count   int       `json:"count"`
 	Content []Content `json:"content"`
 }

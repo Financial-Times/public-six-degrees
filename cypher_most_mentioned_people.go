@@ -7,8 +7,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/jmcvetta/neoism"
 )
+
 func (pcw CypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, limit int) (thingList []Thing, found bool, err error) {
-	log.Infof("logging fromDate:%v toDate:%v  limit:%v",fromDateEpoch, toDateEpoch, limit)
+	log.Infof("logging fromDate:%v toDate:%v  limit:%v", fromDateEpoch, toDateEpoch, limit)
 	results := []neoMentionsReadStruct{}
 	query := &neoism.CypherQuery{
 		Statement: `MATCH (c:Content)-[a:MENTIONS]->(p:Person)
@@ -30,10 +31,9 @@ func (pcw CypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, li
 		log.Errorf("Error finding %v most mentioned people between %v and %v with the following statement: %v  Error: %v", limit, fromDateEpoch, toDateEpoch, query.Statement, err)
 		return []Thing{}, false, fmt.Errorf("Error finding %v most mentioned people between %v and %v", limit, fromDateEpoch, toDateEpoch)
 	}
-	log.Debugf("CypherResult MostMentioned was (fromDate=%v, toDate=%v): %+v", limit, fromDateEpoch, toDateEpoch, results)
+	log.Debugf("CypherResult MostMentioned was (fromDate=%v, toDate=%v)", limit, fromDateEpoch, toDateEpoch)
 
 	thingList, _ = neoReadStructToMentionPeople(&results, limit, pcw.env)
-	log.Infof("Returning %v", thingList)
 	return thingList, true, nil
 }
 

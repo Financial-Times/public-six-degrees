@@ -7,15 +7,16 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/jmcvetta/neoism"
 )
+
 type neoContentReadStruct struct {
 	UUID      string `json:"uuid"`
 	PrefLabel string `json:"prefLabel"`
 }
 
 type neoConnectedPeopleReadStruct struct {
-	UUID      string `json:"uuid"`
-	PrefLabel string `json:"prefLabel"`
-	Count     int    `json:"count"`
+	UUID        string                 `json:"uuid"`
+	PrefLabel   string                 `json:"prefLabel"`
+	Count       int                    `json:"count"`
 	ContentList []neoContentReadStruct `json:"contentList"`
 }
 
@@ -50,14 +51,13 @@ func (pcw CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDate
       between %v and %v with the following statement: %v  Error: %v`, limit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
 		return []ConnectedPerson{}, false, fmt.Errorf("Error finding people with more than %v connections to person with uuid %v between %v and %v with the following statement: %v  Error: %v", limit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
 	}
-	log.Infof("CypherResult connectedPeople was (fromDate=%v, toDate=%v): %+v", fromDateEpoch, toDateEpoch, results)
+
 	if (len(results)) == 0 {
 		return []ConnectedPerson{}, false, nil
 	}
 
 	connectedPeopleResults := neoReadStructToConnectedPeople(&results, pcw.env)
 
-	log.Infof("Returning %v", connectedPeopleResults)
 	return connectedPeopleResults, true, nil
 }
 
