@@ -1,4 +1,4 @@
-FROM alpine:3.3
+FROM alpine:3.4
 ADD *.go .git /public-six-degrees/
 RUN apk add --update bash \
   && apk --update add git go \
@@ -17,7 +17,7 @@ RUN apk add --update bash \
   && mkdir -p $GOPATH/src/${REPO_PATH} \
   && cp -r public-six-degrees/* $GOPATH/src/${REPO_PATH} \
   && cd $GOPATH/src/${REPO_PATH} \
-  && go get ./... \
+  && go get -t -d -v ./... \
   && cd $GOPATH/src/${REPO_PATH} \
   && echo ${LDFLAGS} \
   && go build -ldflags="${LDFLAGS}" \
