@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"encoding/json"
@@ -15,117 +14,66 @@ import (
 	"strconv"
 )
 
-// PeopleDriver for cypher queries
-var SixDegreesDriver Driver
-var CacheControlHeader string
+type defaultTimeGetter func() time.Time
 
-//var maxAge = 24 * time.Hour
+type httpHandlers struct {
+	sixDegreesDriver   driver
+	cacheControlHeader string
+}
 
-// HealthCheck does something
-func HealthCheck() v1a.Check {
+func (hh *httpHandlers) HealthCheck() v1a.Check {
 	return v1a.Check{
-		BusinessImpact: "Unable to respond to Public Six Degree",
+		BusinessImpact: "Unable to respond to Public Six Degrees",
 		Name:           "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
-		PanicGuide:     "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/public-people-api",
+		PanicGuide:     "https://dewey.ft.com/public-six-degrees-api.html",
 		Severity:       1,
 		TechnicalSummary: `Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find
 				the neoUrl as a parameter in hieradata for this service. `,
-		Checker: Checker,
+		Checker: hh.Checker,
 	}
 }
 
-// Checker does more stuff
-func Checker() (string, error) {
-	err := SixDegreesDriver.CheckConnectivity()
+func (hh *httpHandlers) Checker() (string, error) {
+	err := hh.sixDegreesDriver.CheckConnectivity()
 	if err == nil {
 		return "Connectivity to neo4j is ok", err
 	}
 	return "Error connecting to neo4j", err
 }
 
-// Ping says pong
-func Ping(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "pong")
-}
-
 //GoodToGo returns a 503 if the healthcheck fails - suitable for use from varnish to check availability of a node
-func GoodToGo(writer http.ResponseWriter, req *http.Request) {
-	if _, err := Checker(); err != nil {
+func (hh *httpHandlers) GoodToGo(writer http.ResponseWriter, req *http.Request) {
+	if _, err := hh.Checker(); err != nil {
 		writer.WriteHeader(http.StatusServiceUnavailable)
 	}
 
 }
 
-// BuildInfoHandler - This is a stop gap and will be added to when we can define what we should display here
-func BuildInfoHandler(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "build-info")
-}
-
-// MethodNotAllowedHandler handles 405
-func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
-	return
-}
-
-// GetPerson is the public API
-func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
+func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 	limitParam := r.URL.Query().Get("limit")
 	fromDateParam := r.URL.Query().Get("fromDate")
 	toDateParam := r.URL.Query().Get("toDate")
 
-	var limit int
-	var fromDate, toDate time.Time
-	var err error
-
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	//  Defaulting most mentioned limit to 20
-	if limitParam == "" {
-		log.Infof("No limit supplied therefore defaulting to 20")
-		limit = 20
-	} else {
-		limit, err = strconv.Atoi(limitParam)
-	}
-
+	limit, err := getLimit(limitParam, 20)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		log.Errorf("ERROR - %v\n", err)
+		http.Error(w, "Error converting minimumConnections query param", http.StatusBadRequest)
 		return
 	}
 
-	// Defaulting to a week ago
-	if fromDateParam == "" {
-		log.Infof("No fromDate supplied therefore defaulting to week ago")
-		fromDate = time.Now().AddDate(0, 0, -7)
-	} else {
-		fromDate, _ = convertAnnotatedDateToDateTime(fromDateParam)
-	}
-
-	// Defaulting to now
-	if toDateParam == "" {
-		log.Infof("No toDate supplied therefore defaulting to now")
-		toDate = time.Now()
-	} else {
-		toDate, _ = convertAnnotatedDateToDateTime(toDateParam)
-	}
-
-	// Defaulting fromDate to a week before toDate if the toDate is earlier than fromDate
-	if toDate.Before(fromDate) {
-		log.Infof("toDate cannot be earlier than fromDate, defaulting fromDate to a week from toDate")
-		fromDate = toDate.AddDate(0, 0, -7)
-	}
-
-	// Restrict query for 1 year period
-	fromDatePlusAYear := fromDate.AddDate(1, 0, 0)
-	if fromDatePlusAYear.Before(toDate) {
-		log.Infof("The given time period is greater than a year. Defaulting to a year from the given from date")
-		toDate = fromDatePlusAYear
-	}
-
-	log.Infof("The given period is from %v to %v\n", fromDate.String(), toDate.String())
-
-	people, found, err := SixDegreesDriver.MostMentioned(fromDate.Unix(), toDate.Unix(), limit)
+	fromDate, toDate, err := getDateTimePeriod(fromDateParam, toDateParam)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		log.Errorf("ERROR - %v\n", err)
+		http.Error(w, "Error converting toDate or fromDate query params", http.StatusBadRequest)
+		return
+	}
+
+	people, found, err := hh.sixDegreesDriver.MostMentioned(fromDate.Unix(), toDate.Unix(), limit)
+	if err != nil {
+		log.Errorf("ERROR - %v\n", err)
+		http.Error(w, "Error retrieving result from DB", http.StatusInternalServerError)
 		return
 	}
 	if !found {
@@ -134,7 +82,7 @@ func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Cache-Control", CacheControlHeader)
+	w.Header().Set("Cache-Control", hh.cacheControlHeader)
 	w.WriteHeader(http.StatusOK)
 
 	if err = json.NewEncoder(w).Encode(people); err != nil {
@@ -142,104 +90,114 @@ func GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetPerson is the public API
-func GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
+func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	m, _ := url.ParseQuery(request.URL.RawQuery)
 
 	minimumConnectionsParam := m.Get("minimumConnections")
-	limitParam := m.Get("limit")
+	resultLimitParam := m.Get("limit")
 	fromDateParam := m.Get("fromDate")
 	toDateParam := m.Get("toDate")
 	contentLimitParam := m.Get("contentLimit")
 
 	uuid := m.Get("uuid")
 
-	if minimumConnectionsParam == "" {
-		minimumConnectionsParam = "5"
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	fromDate, toDate, err := getDateTimePeriod(fromDateParam, toDateParam)
+	if err != nil {
+		log.Errorf("ERROR - %v\n", err)
+		http.Error(w, "Error converting toDate or fromDate query params", http.StatusBadRequest)
+		return
 	}
 
-	if limitParam == "" {
-		limitParam = "10"
+	minimumConnections, err := getLimit(minimumConnectionsParam, 5)
+	if err != nil {
+		log.Errorf("ERROR - %v\n", err)
+		http.Error(w, "Error converting minimumConnections query param", http.StatusBadRequest)
+		return
 	}
 
-	if contentLimitParam == "" {
-		contentLimitParam = "3"
-		log.Infof("No contentLimit supplied, defaulting contentLimit to %s", contentLimitParam)
+	resultLimit, err := getLimit(resultLimitParam, 10)
+	if err != nil {
+		log.Errorf("ERROR - %v\n", err)
+		http.Error(w, "Error converting limit query param", http.StatusBadRequest)
+		return
 	}
 
-	var fromDate,toDate time.Time
-
-	// Defaulting to a week ago
-	if fromDateParam == "" {
-		log.Infof("No fromDate supplied therefore defaulting to week ago")
-		fromDate = time.Now().AddDate(0, 0, -7)
-	} else {
-		fromDate, _ = convertAnnotatedDateToDateTime(fromDateParam)
+	contentLimit, err := getLimit(contentLimitParam, 3)
+	if err != nil {
+		log.Errorf("ERROR - %v\n", err)
+		http.Error(w, "Error converting contentLimit query param", http.StatusBadRequest)
+		return
 	}
 
-	if toDateParam == "" {
-		log.Infof("No toDate supplied therefore defaulting to now")
-		toDate = time.Now()
-	} else {
-		toDate, _ = convertAnnotatedDateToDateTime(toDateParam)
+	connectedPeople, _, err := hh.sixDegreesDriver.ConnectedPeople(uuid, fromDate.Unix(), toDate.Unix(), resultLimit, minimumConnections, contentLimit)
+	if err != nil {
+		log.Errorf("ERROR - %v\n", err)
+		http.Error(w, "Error retrieving result from DB", http.StatusInternalServerError)
+		return
 	}
 
-	// Defaulting fromDate to a week before toDate if the toDate is earlier than fromDate
+	w.Header().Set("Cache-Control", hh.cacheControlHeader)
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(connectedPeople)
+}
+
+func getDateTimePeriod(fromDateParam string, toDateParam string) (fromDate time.Time, toDate time.Time, err error) {
+	fromDate, err = getDate(fromDateParam, getDefaultFromDate)
+	if err != nil {
+		return
+	}
+
+	toDate, err = getDate(toDateParam, getDefaultToDate)
+	if err != nil {
+		return
+	}
+
+	//toDate cannot be earlier than fromDate, defaulting fromDate to a week from toDate
 	if toDate.Before(fromDate) {
-		log.Infof("toDate cannot be earlier than fromDate, defaulting fromDate to a week from toDate")
 		fromDate = toDate.AddDate(0, 0, -7)
 	}
 
 	// Restrict query for 1 year period
 	fromDatePlusAYear := fromDate.AddDate(1, 0, 0)
 	if fromDatePlusAYear.Before(toDate) {
-		log.Infof("The given time period is greater than a year. Defaulting to a year from the given from date")
 		toDate = fromDatePlusAYear
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
 	log.Infof("The given period is from %v to %v\n", fromDate.String(), toDate.String())
-
-	minimumConnections, err := strconv.Atoi(minimumConnectionsParam)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	limit, err := strconv.Atoi(limitParam)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	contentLimit, err := strconv.Atoi(contentLimitParam)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	connectedPeople, _, _ := SixDegreesDriver.ConnectedPeople(uuid, fromDate.Unix(), toDate.Unix(), limit, minimumConnections, contentLimit)
-
-	//samplePerson1 := Thing{"id " + uuid, "apiurl", "Angela Merkel"}
-	//samplePerson2 := Thing{"id " + uuid, "apiurl", "David Cameron"}
-	//sampleConnectedPerson1 := ConnectedPerson{samplePerson1, 534}
-	//sampleConnectedPerson2 := ConnectedPerson{samplePerson2, 54}
-	//sampleConnectedPersonSlice := []ConnectedPerson{sampleConnectedPerson1, sampleConnectedPerson2}
-	//sampleConnectedPeople := ConnectedPeople{sampleConnectedPersonSlice}
-	w.Header().Set("Cache-Control", CacheControlHeader)
-	w.WriteHeader(http.StatusOK)
-	//w.Write([]byte(`{"message": "hello world", "uuid": "` + uuid + `"}`))
-	//json.NewEncoder(w).Encode(sampleConnectedPersonSlice)
-	json.NewEncoder(w).Encode(connectedPeople)
+	return
 }
 
-func convertAnnotatedDateToDateTime(annotatedDateString string) (time.Time, error) {
-	datetime, err := time.Parse("2006-01-02", annotatedDateString)
+func getDate(dateParam string, getDefaultTime defaultTimeGetter) (time.Time, error) {
+	if dateParam == "" {
+		return getDefaultTime(), nil
+	}
+	return convertDateStringToDateTime(dateParam)
+}
+
+func getLimit(limitParam string, defaultLimit int) (int, error) {
+	if limitParam == "" {
+		return defaultLimit, nil
+	}
+	return strconv.Atoi(limitParam)
+}
+
+func convertDateStringToDateTime(dateString string) (time.Time, error) {
+	datetime, err := time.Parse("2006-01-02", dateString)
 
 	if err != nil {
 		return time.Time{}, err
 	}
 
 	return datetime, nil
+}
+
+func getDefaultFromDate() time.Time {
+	return time.Now().AddDate(0, 0, -7)
+}
+
+func getDefaultToDate() time.Time {
+	return time.Now()
 }

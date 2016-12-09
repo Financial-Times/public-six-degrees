@@ -1,40 +1,28 @@
 package main
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"github.com/jmcvetta/neoism"
+	"github.com/Financial-Times/neo-utils-go/neoutils"
 )
 
-// Driver interface
-type Driver interface {
+type driver interface {
 	ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, limit int, minimumConnections int, contentLimit int) (connectedPeople []ConnectedPerson, found bool, err error)
 	MostMentioned(fromDateEpoch int64, toDateEpoch int64, limit int) (thingList []Thing, found bool, err error)
 	CheckConnectivity() error
 }
 
-// CypherDriver struct
-type CypherDriver struct {
-	db  *neoism.Database
-	env string
+type cypherDriver struct {
+	conn neoutils.NeoConnection
+	env  string
 }
 
 //NewCypherDriver instantiate driver
-func NewCypherDriver(db *neoism.Database, env string) CypherDriver {
-	return CypherDriver{db, env}
+func NewCypherDriver(conn neoutils.NeoConnection, env string) cypherDriver {
+	return cypherDriver{conn, env}
 }
 
 // CheckConnectivity tests neo4j by running a simple cypher query
-func (pcw CypherDriver) CheckConnectivity() error {
-	results := []struct {
-		ID int
-	}{}
-	query := &neoism.CypherQuery{
-		Statement: "MATCH (x) RETURN ID(x) LIMIT 1",
-		Result:    &results,
-	}
-	err := pcw.db.Cypher(query)
-	log.Debugf("CheckConnectivity results:%+v  err: %+v", results, err)
-	return err
+func (cd cypherDriver) CheckConnectivity() error {
+	return neoutils.Check(cd.conn)
 }
 
 type neoMentionsReadStruct struct {

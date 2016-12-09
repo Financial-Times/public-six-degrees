@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	log "github.com/Sirupsen/logrus"
 	"github.com/jmcvetta/neoism"
@@ -20,7 +18,7 @@ type neoConnectedPeopleReadStruct struct {
 	ContentList []neoContentReadStruct `json:"contentList"`
 }
 
-func (pcw CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, limit int, minimumConnections int, contentLimit int) (connectedPeople []ConnectedPerson, found bool, err error) {
+func (cd cypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, resultLimit int, minimumConnections int, contentLimit int) (connectedPeople []ConnectedPerson, found bool, err error) {
 	results := []neoConnectedPeopleReadStruct{}
 
 	statement := `
@@ -32,7 +30,7 @@ func (pcw CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDate
 	WITH p2.uuid as uuid, p2.prefLabel as prefLabel, cm as count, content as contentList
 	RETURN prefLabel, uuid, count, contentList
 	ORDER BY count DESC LIMIT {limit}`
-	//thing := Thing{}
+
 	query := &neoism.CypherQuery{
 		Statement: statement,
 		Parameters: neoism.Props{
@@ -40,23 +38,18 @@ func (pcw CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDate
 			"fromDate":           fromDateEpoch,
 			"toDate":             toDateEpoch,
 			"minimumConnections": minimumConnections,
-			"limit":              limit,
+			"limit":              resultLimit,
 			"contentLimit":       contentLimit,
 		},
 		Result: &results,
 	}
-	err = pcw.db.Cypher(query)
-	if err != nil {
+	if err = cd.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 {
 		log.Errorf(`Error finding people with more than %v connections to person with uuid %v
-      between %v and %v with the following statement: %v  Error: %v`, limit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
-		return []ConnectedPerson{}, false, fmt.Errorf("Error finding people with more than %v connections to person with uuid %v between %v and %v with the following statement: %v  Error: %v", limit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
+      between %v and %v with the following statement: %v  Error: %v`, resultLimit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
+		return []ConnectedPerson{}, false, err
 	}
 
-	if (len(results)) == 0 {
-		return []ConnectedPerson{}, false, nil
-	}
-
-	connectedPeopleResults := neoReadStructToConnectedPeople(&results, pcw.env)
+	connectedPeopleResults := neoReadStructToConnectedPeople(&results, cd.env)
 
 	return connectedPeopleResults, true, nil
 }
