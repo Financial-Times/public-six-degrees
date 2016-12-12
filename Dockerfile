@@ -4,8 +4,8 @@ ARG PROJECT=public-six-degrees
 
 ADD . /${PROJECT}/
 
-RUN apk add --update --no-cache bash \
-  && apk --update --no-cache --virtual .build-dependencies add git go \
+RUN apk add --no-cache bash \
+  && apk --no-cache --virtual .build-dependencies add git go \
   && cd ${PROJECT} \
   && git fetch origin 'refs/tags/*:refs/tags/*' \
   && BUILDINFO_PACKAGE="github.com/Financial-Times/service-status-go/buildinfo." \
@@ -19,7 +19,7 @@ RUN apk add --update --no-cache bash \
   && export GOPATH=/gopath \
   && REPO_ROOT="github.com/Financial-Times/" \
   && REPO_PATH="$REPO_ROOT/${PROJECT}" \
-  && mkdir -p $GOPATH/src/${REPO_PATH} \
+  && mkdir -p $GOPATH/src/${REPO_ROOT} \
   && mv ${PROJECT} $GOPATH/src/${REPO_ROOT} \
   && cd $GOPATH/src/${REPO_PATH} \
   && go get -t -d -v ./... \
