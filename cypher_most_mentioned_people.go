@@ -20,7 +20,7 @@ func (pcw cypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, li
 		Parameters: neoism.Props{"fromDateEpoch": fromDateEpoch, "toDateEpoch": toDateEpoch, "mentionsLimit": limit},
 		Result:     &results,
 	}
-	log.Infof("Query %v", query)
+	log.Debugf("Query %v", query)
 
 	if err = pcw.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil {
 		log.Errorf("Error finding %v most mentioned people between %v and %v with the following statement: %v  Error: %v", limit, fromDateEpoch, toDateEpoch, query.Statement, err)
@@ -28,12 +28,13 @@ func (pcw cypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, li
 	}
 	log.Debugf("CypherResult MostMentioned was (fromDate=%v, toDate=%v)", limit, fromDateEpoch, toDateEpoch)
 
-	thingList, _ = neoReadStructToMentionPeople(&results, limit, pcw.env)
+	thingList, _ = neoReadStructToMentionPeople(&results)
+	log.Debugf("Result: %v\n", thingList)
 	return thingList, true, nil
 }
 
-func neoReadStructToMentionPeople(neo *[]neoMentionsReadStruct, limit int, env string) (peopleList []Thing, err error) {
-	peopleList = []Thing{}
+func neoReadStructToMentionPeople(neo *[]neoMentionsReadStruct) ([]Thing, error) {
+	peopleList := []Thing{}
 	for _, neoCon := range *neo {
 		log.Infof("neoCon result: %v", neoCon)
 		var thing = Thing{}

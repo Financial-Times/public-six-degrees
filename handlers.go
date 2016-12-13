@@ -10,8 +10,16 @@ import (
 
 	"time"
 
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"strconv"
+)
+
+const (
+	defaultConnectedPeopleResultLimit     = 10
+	defaultMostMentionedPeopleResultLimit = 20
+	defaultMinConnections                 = 5
+	defaultContentLimit                   = 3
 )
 
 type defaultTimeGetter func() time.Time
@@ -50,35 +58,42 @@ func (hh *httpHandlers) GoodToGo(writer http.ResponseWriter, req *http.Request) 
 }
 
 func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
-	limitParam := r.URL.Query().Get("limit")
+	resultLimitParam := r.URL.Query().Get("limit")
 	fromDateParam := r.URL.Query().Get("fromDate")
 	toDateParam := r.URL.Query().Get("toDate")
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	limit, err := getLimit(limitParam, 20)
+	limit, err := getLimit(resultLimitParam, defaultMostMentionedPeopleResultLimit)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
-		http.Error(w, "Error converting minimumConnections query param", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting limit query param, err=%v", err)})
+		w.Write([]byte(msg))
 		return
 	}
 
 	fromDate, toDate, err := getDateTimePeriod(fromDateParam, toDateParam)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
-		http.Error(w, "Error converting toDate or fromDate query params", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting toDate or fromDate query params: fromDate=%s, toDate=%s", fromDateParam, toDateParam)})
+		w.Write([]byte(msg))
 		return
 	}
 
 	people, found, err := hh.sixDegreesDriver.MostMentioned(fromDate.Unix(), toDate.Unix(), limit)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
-		http.Error(w, "Error retrieving result from DB", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		msg, _ := json.Marshal(ErrorMessage{"Error retrieving result from DB"})
+		w.Write([]byte(msg))
 		return
 	}
 	if !found {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"message":"Nothing found."}`))
+		msg, _ := json.Marshal(ErrorMessage{"No result"})
+		w.Write([]byte(msg))
 		return
 	}
 
@@ -106,35 +121,52 @@ func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.
 	fromDate, toDate, err := getDateTimePeriod(fromDateParam, toDateParam)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
-		http.Error(w, "Error converting toDate or fromDate query params", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting toDate or fromDate query params: fromDate=%s, toDate=%s", fromDateParam, toDateParam)})
+		w.Write([]byte(msg))
 		return
 	}
 
-	minimumConnections, err := getLimit(minimumConnectionsParam, 5)
+	minimumConnections, err := getLimit(minimumConnectionsParam, defaultMinConnections)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
-		http.Error(w, "Error converting minimumConnections query param", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting minimumConnections query param, err=%v", err)})
+		w.Write([]byte(msg))
 		return
 	}
 
-	resultLimit, err := getLimit(resultLimitParam, 10)
+	resultLimit, err := getLimit(resultLimitParam, defaultConnectedPeopleResultLimit)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
-		http.Error(w, "Error converting limit query param", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting limit query param, err=%v", err)})
+		w.Write([]byte(msg))
 		return
 	}
 
-	contentLimit, err := getLimit(contentLimitParam, 3)
+	contentLimit, err := getLimit(contentLimitParam, defaultContentLimit)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
-		http.Error(w, "Error converting contentLimit query param", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting contentLimit query param, err=%v", err)})
+		w.Write([]byte(msg))
 		return
 	}
 
-	connectedPeople, _, err := hh.sixDegreesDriver.ConnectedPeople(uuid, fromDate.Unix(), toDate.Unix(), resultLimit, minimumConnections, contentLimit)
+	connectedPeople, found, err := hh.sixDegreesDriver.ConnectedPeople(uuid, fromDate.Unix(), toDate.Unix(), resultLimit, minimumConnections, contentLimit)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
-		http.Error(w, "Error retrieving result from DB", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error retrieving result for %s, err=%v", uuid, err)})
+		w.Write([]byte(msg))
+		return
+	}
+
+	if !found {
+		w.WriteHeader(http.StatusNotFound)
+		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("No connected people found for person with uuid %s", uuid)})
+		w.Write([]byte(msg))
 		return
 	}
 
@@ -160,13 +192,13 @@ func getDateTimePeriod(fromDateParam string, toDateParam string) (fromDate time.
 		fromDate = toDate.AddDate(0, 0, -7)
 	}
 
-	// Restrict query for 1 year period
+	// Restrict query for 1 year period based on fromDate value
 	fromDatePlusAYear := fromDate.AddDate(1, 0, 0)
 	if fromDatePlusAYear.Before(toDate) {
 		toDate = fromDatePlusAYear
 	}
 
-	log.Infof("The given period is from %v to %v\n", fromDate.String(), toDate.String())
+	log.Debugf("The given period is from %v to %v\n", fromDate.String(), toDate.String())
 	return
 }
 

@@ -29,4 +29,4 @@ RUN apk add --no-cache bash \
   && mv ${PROJECT} / \
   && apk del .build-dependencies \
   && rm -rf $GOPATH /var/cache/apk/*
-CMD exec /public-six-degrees --neo-url=$NEO_URL --port=$APP_PORT --graphiteTCPAddress=$GRAPHITE_ADDRESS --graphitePrefix=$GRAPHITE_PREFIX --logMetrics=$LOG_METRICS --cache-duration=$CACHE_DURATION
+CMD exec /public-six-degrees

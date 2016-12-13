@@ -17,3 +17,7 @@ type ConnectedPerson struct {
 	Count   int       `json:"count"`
 	Content []Content `json:"content"`
 }
+
+type ErrorMessage struct {
+	Message string `json:"message"`
+}

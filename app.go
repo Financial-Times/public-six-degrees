@@ -95,7 +95,7 @@ func runServer(neoURL string, port string, cacheDuration string) {
 		log.Fatalf("Error connecting to neo4j %s", err)
 	}
 
-	httpHandlers := httpHandlers{NewCypherDriver(conn, "local"), cacheControlHeader}
+	httpHandlers := httpHandlers{cypherDriver{conn}, cacheControlHeader}
 	r := router(httpHandlers)
 
 	http.HandleFunc("/__health", v1a.Handler("PublicSixDegrees Healthchecks",

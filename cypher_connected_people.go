@@ -43,22 +43,25 @@ func (cd cypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateE
 		},
 		Result: &results,
 	}
+	log.Debugf("Query %v", query)
+
 	if err = cd.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 {
 		log.Errorf(`Error finding people with more than %v connections to person with uuid %v
       between %v and %v with the following statement: %v  Error: %v`, resultLimit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
 		return []ConnectedPerson{}, false, err
 	}
 
-	connectedPeopleResults := neoReadStructToConnectedPeople(&results, cd.env)
+	connectedPeopleResults := neoReadStructToConnectedPeople(&results)
+	log.Infof("Result: %v\n", connectedPeopleResults)
 
 	return connectedPeopleResults, true, nil
 }
 
-func neoReadStructToConnectedPeople(neo *[]neoConnectedPeopleReadStruct, env string) []ConnectedPerson {
+func neoReadStructToConnectedPeople(neo *[]neoConnectedPeopleReadStruct) []ConnectedPerson {
 	connectedPeople := []ConnectedPerson{}
 	for _, neoCP := range *neo {
 		var connectedPerson = ConnectedPerson{}
-		connectedPerson.Person.APIURL = mapper.APIURL(neoCP.UUID, []string{"Person"}, env)
+		connectedPerson.Person.APIURL = mapper.APIURL(neoCP.UUID, []string{"Person"}, "local")
 		connectedPerson.Person.ID = mapper.IDURL(neoCP.UUID)
 		connectedPerson.Person.PrefLabel = neoCP.PrefLabel
 		connectedPerson.Count = neoCP.Count
@@ -69,7 +72,7 @@ func neoReadStructToConnectedPeople(neo *[]neoConnectedPeopleReadStruct, env str
 			var content = Content{}
 			content.ID = neoContent.UUID
 			content.Title = neoContent.PrefLabel
-			content.APIURL = mapper.APIURL(neoContent.UUID, []string{"Content"}, env)
+			content.APIURL = mapper.APIURL(neoContent.UUID, []string{"Content"}, "local")
 			contentList = append(contentList, content)
 		}
 		connectedPerson.Content = contentList
