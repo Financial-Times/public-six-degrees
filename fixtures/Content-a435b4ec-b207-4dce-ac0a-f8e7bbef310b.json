@@ -1,0 +1,18 @@
+{
+  "uuid": "a435b4ec-b207-4dce-ac0a-f8e7bbef310b",
+  "title": "Learn Golang",
+  "byline": "By Dave Chaney",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FTCOM-METHODE",
+      "identifierValue": "a435b4ec-b207-4dce-ac0a-f8e7bbef310b"
+    }
+  ],
+  "publishedDate": "2016-12-15T19:18:01.000Z",
+  "body": "<body><p>I had a great time at buildercon, the talks were varied and engaging from a wide selection of Japanese makers. I’m grateful to the builderscon organisers for accepting my talk and inviting me to present at the inaugural builderscon conference in Tokyo, Japan.</p>\n</body>",
+  "brands": [
+    {
+      "id": "http://api.ft.com/things/dbb0bdae-1f0c-11e4-b0cb-b2227cce2b54"
+    }
+  ]
+}

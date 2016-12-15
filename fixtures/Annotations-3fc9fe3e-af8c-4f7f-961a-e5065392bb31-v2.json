@@ -1,0 +1,47 @@
+[
+  {
+    "thing": {
+      "id": "http://api.ft.com/things/b30ec30e-83ca-4e4a-b82f-db6f7a0bb16d",
+      "prefLabel": "Boris Johnson",
+      "types": [
+        "Thing",
+        "Concept",
+        "Person"
+      ],
+      "predicate": "mentions"
+    },
+    "provenances": [{
+      "scores": [{
+        "scoringSystem": "http://api.ft.com/scoringsystem/FT-RELEVANCE-SYSTEM",
+        "value": 0.01807261511822952
+      }, {
+        "scoringSystem": "http://api.ft.com/scoringsystem/FT-CONFIDENCE-SYSTEM",
+        "value": 0.9904671727661362
+      }],
+      "agentRole": "http://api.ft.com/things/0edd3c31-1fd0-4ef6-9230-8d545be3880a",
+      "atTime": "2016-10-19T14:58:07.567Z"
+    }]
+  }, {
+  "thing": {
+    "id": "http://api.ft.com/things/13a9d251-71db-467a-af2f-7e56a61c910a",
+    "prefLabel": "Siobhan Morden",
+    "types": [
+      "Thing",
+      "Concept",
+      "Person"
+    ],
+    "predicate": "mentions"
+  },
+  "provenances": [{
+    "scores": [{
+      "scoringSystem": "http://api.ft.com/scoringsystem/FT-RELEVANCE-SYSTEM",
+      "value": 0.12456035928791732
+    }, {
+      "scoringSystem": "http://api.ft.com/scoringsystem/FT-CONFIDENCE-SYSTEM",
+      "value": 0.8199255640787576
+    }],
+    "agentRole": "http://api.ft.com/things/0edd3c31-1fd0-4ef6-9230-8d545be3880a",
+    "atTime": "2016-10-19T14:58:07.567Z"
+  }]
+}
+]

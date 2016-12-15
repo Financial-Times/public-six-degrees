@@ -2,27 +2,27 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
-	"encoding/json"
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
-	"time"
 )
 
 const knownUUID = "12345"
 
-type test struct {
+type handlerTestCase struct {
 	name                       string
 	req                        *http.Request
 	driver                     *dummyDriver
 	statusCode                 int
-	contentType                string // Contents of the Content-Type header
+	contentType                string
 	body                       string
 	expectedResultLimit        int
 	expectedFromDateEpoch      int64
@@ -33,7 +33,7 @@ type test struct {
 
 func TestGetConnectedPeople(t *testing.T) {
 	assert := assert.New(t)
-	tests := []test{
+	tests := []handlerTestCase{
 		{
 			name:                       "Success",
 			req:                        newRequest("GET", fmt.Sprintf("/sixdegrees/connectedPeople?uuid=%s", knownUUID), "application/json", nil),
@@ -207,7 +207,7 @@ func TestGetConnectedPeople(t *testing.T) {
 
 func TestGetMostMentionedPeople(t *testing.T) {
 	assert := assert.New(t)
-	tests := []test{
+	tests := []handlerTestCase{
 		{
 			name:                  "Success",
 			req:                   newRequest("GET", "/sixdegrees/mostMentionedPeople", "application/json", nil),
@@ -323,7 +323,7 @@ func TestGetMostMentionedPeople(t *testing.T) {
 }
 func TestCheckConnectivity(t *testing.T) {
 	assert := assert.New(t)
-	tests := []test{
+	tests := []handlerTestCase{
 		{
 			name:        "HealthSuccess",
 			req:         newRequest("GET", "/__health", "application/json", nil),

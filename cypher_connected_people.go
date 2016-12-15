@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
-	log "github.com/Sirupsen/logrus"
 	"github.com/jmcvetta/neoism"
 )
 
@@ -18,7 +17,7 @@ type neoConnectedPeopleReadStruct struct {
 	ContentList []neoContentReadStruct `json:"contentList"`
 }
 
-func (cd cypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, resultLimit int, minimumConnections int, contentLimit int) (connectedPeople []ConnectedPerson, found bool, err error) {
+func (cd cypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, resultLimit int, minimumConnections int, contentLimit int) ([]ConnectedPerson, bool, error) {
 	results := []neoConnectedPeopleReadStruct{}
 
 	statement := `
@@ -26,7 +25,7 @@ func (cd cypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateE
 	WITH c
 	MATCH (p:Person{uuid:{uuid}})<-[:MENTIONS]-(c)-[:MENTIONS]->(p2:Person)
 	WITH p, count(distinct(c)) as cm, p2, collect({uuid: c.uuid, prefLabel: c.prefLabel})[0..{contentLimit}] as content
-	WHERE cm > {minimumConnections}
+	WHERE cm >= {minimumConnections}
 	WITH p2.uuid as uuid, p2.prefLabel as prefLabel, cm as count, content as contentList
 	RETURN prefLabel, uuid, count, contentList
 	ORDER BY count DESC LIMIT {limit}`
@@ -43,21 +42,15 @@ func (cd cypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateE
 		},
 		Result: &results,
 	}
-	log.Debugf("Query %v", query)
 
-	if err = cd.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 {
-		log.Errorf(`Error finding people with more than %v connections to person with uuid %v
-      between %v and %v with the following statement: %v  Error: %v`, resultLimit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
+	if err := cd.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 {
 		return []ConnectedPerson{}, false, err
 	}
 
-	connectedPeopleResults := neoReadStructToConnectedPeople(&results)
-	log.Infof("Result: %v\n", connectedPeopleResults)
-
-	return connectedPeopleResults, true, nil
+	return transformToConnectedPeople(&results), true, nil
 }
 
-func neoReadStructToConnectedPeople(neo *[]neoConnectedPeopleReadStruct) []ConnectedPerson {
+func transformToConnectedPeople(neo *[]neoConnectedPeopleReadStruct) []ConnectedPerson {
 	connectedPeople := []ConnectedPerson{}
 	for _, neoCP := range *neo {
 		var connectedPerson = ConnectedPerson{}

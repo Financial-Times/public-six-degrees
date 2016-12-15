@@ -1,0 +1,21 @@
+{
+  "uuid": "b30ec30e-83ca-4e4a-b82f-db6f7a0bb16d",
+  "prefLabel": "Boris Johnson",
+  "aliases": [
+    "Alexander Boris de Pfeffel Johnson",
+    "Boris Johnson"
+  ],
+  "alternativeIdentifiers" : {
+    "uuids": ["b30ec30e-83ca-4e4a-b82f-db6f7a0bb16d"],
+    "factsetIdentifier" : "91ABCD-F"
+  },
+  "salutation": "Mr.",
+  "birthYear": 1972,
+  "emailAddress": "test@example.com",
+  "twitterHandle": "@something",
+  "facebookProfile": "the-facebook-profile2",
+  "linkedinProfile": "the-linkedin-profile2",
+  "description": "Some text2",
+  "descriptionXML": "Some text containing <strong>markup</strong>2",
+  "_imageUrl": "http://someimage2.jpg"
+}
