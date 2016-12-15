@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/Financial-Times/public-six-degrees/tree/master.png?style=shield)](https://circleci.com/gh/Financial-Times/public-six-degrees/tree/master)
+[![Coverage Status](https://coveralls.io/repos/github/Financial-Times/public-six-degrees/badge.svg)](https://coveralls.io/github/Financial-Times/public-six-degrees)
 # Public Six Degrees API
 
 Provides a public API for retrieving most mentioned people and connected people for the 'Six degrees' application.
