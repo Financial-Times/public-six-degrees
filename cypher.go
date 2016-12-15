@@ -14,7 +14,6 @@ type cypherDriver struct {
 	conn neoutils.NeoConnection
 }
 
-// CheckConnectivity tests neo4j by running a simple cypher query
 func (cd cypherDriver) CheckConnectivity() error {
 	return neoutils.Check(cd.conn)
 }

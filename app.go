@@ -1,10 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
-
-	"fmt"
 	"strconv"
 	"time"
 

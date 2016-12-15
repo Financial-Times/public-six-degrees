@@ -1,18 +1,15 @@
 package main
 
 import (
-	"net/http"
-
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"net/url"
-
-	"github.com/Financial-Times/go-fthealth/v1a"
-
+	"strconv"
 	"time"
 
-	"fmt"
+	"github.com/Financial-Times/go-fthealth/v1a"
 	log "github.com/Sirupsen/logrus"
-	"strconv"
 )
 
 const (
@@ -31,13 +28,12 @@ type httpHandlers struct {
 
 func (hh *httpHandlers) HealthCheck() v1a.Check {
 	return v1a.Check{
-		BusinessImpact: "Unable to respond to Public Six Degrees",
-		Name:           "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
-		PanicGuide:     "https://dewey.ft.com/public-six-degrees-api.html",
-		Severity:       1,
-		TechnicalSummary: `Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find
-				the neoUrl as a parameter in hieradata for this service. `,
-		Checker: hh.Checker,
+		BusinessImpact:   "Unable to respond to Public Six Degrees",
+		Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
+		PanicGuide:       "https://dewey.ft.com/public-six-degrees-api.html",
+		Severity:         1,
+		TechnicalSummary: `Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running.`,
+		Checker:          hh.Checker,
 	}
 }
 
@@ -113,7 +109,6 @@ func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.
 	fromDateParam := m.Get("fromDate")
 	toDateParam := m.Get("toDate")
 	contentLimitParam := m.Get("contentLimit")
-
 	uuid := m.Get("uuid")
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

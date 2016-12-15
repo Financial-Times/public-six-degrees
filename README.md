@@ -1,68 +1,119 @@
-Public Six Degrees
-==================
+# Public Six Degrees API
 
-An implementation of the FT Labs "Six degrees of Angela Merkel" demo that was produced
-in 2015. Connects to data in neo4j, and is written in Go.
+Provides a public API for retrieving most mentioned people and connected people for the 'Six degrees' application.
+Connects to Neo4j to get the needed data.
 
+## Build & deployment
 
-Getting Started
----------------
+* Build in DockerHub: https://hub.docker.com/r/coco/public-six-degrees/builds/
+* Deployed in delivery cluster: https://github.com/Financial-Times/up-service-files/blob/master/public-six-degrees%40.service
 
-1. Download and install neo4j.
-1. Disable authentication.
-1. Start up neo4j.
-1. Build the app:
+## Installation & running locally
 
-        go build
+* `go get -u -t github.com/Financial-Times/public-six-degrees`
+* `cd $GOPATH/src/github.com/Financial-Times/public-six-degrees`
+* `go test -race -v ./...`
+*  `./public-six-degrees --neo-url={neo4jUrl}`
 
-2. Run the app (Mac / Linux):
+## Endpoints
+### GET
 
-        ./public-six-degrees
+* `/sixdegrees/connectedPeople` - Get connected people to a given person
+    * `uuid` - (required) The given person's UUID we want to query
+    * `fromDate` - Start date, in YYYY-MM-DD format. Defaults to one week ago if not given. 
+    If toDate is before fromDate, fromDate changes to be a week from toDate. 
+    If the difference between fromDate and toDate is greater than 1 year, toDate is changed to be 1 year after fromDate
+    * `toDate` - End date, in YYYY-MM-DD format. Defaults to today if not given
+    If toDate is before fromDate, fromDate changes to be a week from toDate. 
+    If the difference between fromDate and toDate is greater than 1 year, toDate is changed to be 1 year after fromDate     
+    * `minimumConnections` - The minimum number of connections required for a connection to appear in the list. Defaults to 5 if not given
+    * `contentLimit` - The maximum number of content returned for a mentioned connected person. Defaults to 3 if not given
+    * `limit` - The maximum number of resulting connected people. Defaults to 10 if not given
+* `/sixdegrees/mostMentionedPeople`
+    * `fromDate` - Start date, in YYYY-MM-DD format. Defaults to one week ago if not given
+    If toDate is before fromDate, fromDate changes to be a week from toDate. 
+    If the difference between fromDate and toDate is greater than 1 year, toDate is changed to be 1 year after fromDate     
+    * `toDate` - End date, in YYYY-MM-DD format. Defaults to today if not given 
+    If toDate is before fromDate, fromDate changes to be a week from toDate. 
+    If the difference between fromDate and toDate is greater than 1 year, toDate is changed to be 1 year after fromDate    
+    * `limit` - The maximum number of resulting most mentioned people. Defaults to 20 if not given
 
-3. Visit: [http://localhost:8080/sixdegrees/connectedPeople](http://localhost:8080/sixdegrees/connectedPeople)
-
-
-Sample queries
---------------
-
-    curl http://sixdegrees-demo.in.ft.com/sixdegrees/connectedPeople?uuid=36c6124-24c0-39fe-9172-d37c60eafdeg&fromDate=2016-05-17&toDate=2016-05-18
-    curl http://sixdegrees-demo.in.ft.com/sixdegrees/connectedPeople?uuid=dc278df2-1c8b-3e44-8ca8-5d255f75f737&fromDate=2014-01-01&toDate=2016-05-17&minimumConnections=1
-    curl http://sixdegrees-demo.in.ft.com/sixdegrees/mostMentionedPeople?fromDate=2014-01-01&toDate=2016-05-17
-    curl http://sixdegrees-demo.in.ft.com/sixdegrees/mostMentionedPeople?fromDate=2014-01-01&toDate=2016-05-17&limit=50
+### Admin
     
-    MostMentioned defaults to the last week and limit of 20
-    curl http://sixdegrees-demo.in.ft.com/sixdegrees/mostMentionedPeople
+* `/__health`
+* `/__gtg`
+* `/__ping`
+* `/__build-info`
+* `/ping`
+* `/build-info`
 
-API
----
+    
+## Example
 
-See [swagger.yaml](apidoc/swagger.yaml).
+* With `/sixdegrees/connectedPeople`
+`GET /sixdegrees/connectedPeople?uuid=dc278df2-1c8b-3e44-8ca8-5d255f75f737&fromDate=2016-01-01&toDate=2016-05-17&limit=2`
+```
+[{
+    "person": {
+        "id": "http://api.ft.com/things/9185a2a9-1545-302b-9a16-c63986b67be3",
+        "apiUrl": "http://api.ft.com/people/9185a2a9-1545-302b-9a16-c63986b67be3",
+        "prefLabel": "Boris Johnson"
+    },
+    "count": 162,
+    "content": [{
+        "id": "40b38230-c101-11e5-9fdb-87b8d15baec2",
+        "apiUrl": "http://api.ft.com/content/40b38230-c101-11e5-9fdb-87b8d15baec2",
+        "title": "Heathrow decision put off until after EU referendum"
+    }, {
+        "id": "6db05608-18e7-11e6-b197-a4af20d5575e",
+        "apiUrl": "http://api.ft.com/content/6db05608-18e7-11e6-b197-a4af20d5575e",
+        "title": "Do we still need to build a third runway at Heathrow?"
+    }, {
+        "id": "81665806-e23b-11e5-9217-6ae3733a2cd1",
+        "apiUrl": "http://api.ft.com/content/81665806-e23b-11e5-9217-6ae3733a2cd1",
+        "title": "Osborne plays it safe over pensions"
+    }]
+}, {
+    "person": {
+        "id": "http://api.ft.com/things/9421d9ee-7e0f-3f7c-8adc-ded83fabdb92",
+        "apiUrl": "http://api.ft.com/people/9421d9ee-7e0f-3f7c-8adc-ded83fabdb92",
+        "prefLabel": "George Gideon Oliver Osborne"
+    },
+    "count": 136,
+    "content": [{
+        "id": "40b38230-c101-11e5-9fdb-87b8d15baec2",
+        "apiUrl": "http://api.ft.com/content/40b38230-c101-11e5-9fdb-87b8d15baec2",
+        "title": "Heathrow decision put off until after EU referendum"
+    }, {
+        "id": "6db05608-18e7-11e6-b197-a4af20d5575e",
+        "apiUrl": "http://api.ft.com/content/6db05608-18e7-11e6-b197-a4af20d5575e",
+        "title": "Do we still need to build a third runway at Heathrow?"
+    }, {
+        "id": "ceeaecdc-e12c-11e5-9217-6ae3733a2cd1",
+        "apiUrl": "http://api.ft.com/content/ceeaecdc-e12c-11e5-9217-6ae3733a2cd1",
+        "title": "Minister takes on Treasury over pension Isa"
+    }]
+}]
+```
 
+* With `/sixdegrees/mostMentionedPeople`
 
-Test Environment
-----------------
-
-We have a test environment running in EC2.
-
-Nodegroup: https://ftppm521-lvuk-uk-p.osb.ft.com/admin/deployments/nodegroup/279/
-
-
-Build & Deploy
---------------
-
-1. Tag: `git tag 0.0.x`
-1. Push: `git push origin --tags`
-1. Build: [public-six-degrees-api-build](http://ftjen10085-lvpr-uk-p.osb.ft.com:8181/view/JOBS-public-six-degrees-api/job/public-six-degrees-api-build/)
-1. Deploy: there are currently some problems with the Jenkins deploy job, so navigate to the nodegroup and "create a deployment"
-   from there instead.
-
-References
-----------
-
-1. http://ftlabs.github.io/six-degrees/ - original demo
-    1. http://ftlabs.github.io/six-degrees/graph.html - the bobbly graph
-    1. http://ftlabs.github.io/six-degrees/erdos.html - Merkel chains
-    1. http://ftlabs-sapi-capi-slurp-slice.herokuapp.com/display_options
-1. http://bl.ocks.org/mbostock/4062045 - d3.js force-directed graph
-1. http://editor.swagger.io/#/ - Swagger editor for producing our API docs.
-    1. https://github.com/swagger-api/swagger-ui - for displaying API docs
+`GET /sixdegrees/mostMentionedPeople?fromDate=2016-01-01&toDate=2016-01-02&limit=5`
+```
+[{
+    "id": "http://api.ft.com/things/dc278df2-1c8b-3e44-8ca8-5d255f75f737",
+    "prefLabel": "David William Donald Cameron"
+}, {
+    "id": "http://api.ft.com/things/8d9470c9-127e-3fc7-95a0-71804cc5ea9d",
+    "prefLabel": "Hillary Rodham Clinton"
+}, {
+    "id": "http://api.ft.com/things/3ead3886-85d3-36ee-95e3-75ed1dc832b7",
+    "prefLabel": "John Ellis Bush"
+}, {
+    "id": "http://api.ft.com/things/4b600f39-7706-3acd-897d-3b81100b30bd",
+    "prefLabel": "Joachim Herrmann"
+}, {
+    "id": "http://api.ft.com/things/889a4f48-c4df-3e2e-89a5-7665b49ced07",
+    "prefLabel": "Jack A. Ablin"
+}]
+```
