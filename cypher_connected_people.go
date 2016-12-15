@@ -1,25 +1,24 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	log "github.com/Sirupsen/logrus"
 	"github.com/jmcvetta/neoism"
 )
+
 type neoContentReadStruct struct {
 	UUID      string `json:"uuid"`
 	PrefLabel string `json:"prefLabel"`
 }
 
 type neoConnectedPeopleReadStruct struct {
-	UUID      string `json:"uuid"`
-	PrefLabel string `json:"prefLabel"`
-	Count     int    `json:"count"`
+	UUID        string                 `json:"uuid"`
+	PrefLabel   string                 `json:"prefLabel"`
+	Count       int                    `json:"count"`
 	ContentList []neoContentReadStruct `json:"contentList"`
 }
 
-func (pcw CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, limit int, minimumConnections int, contentLimit int) (connectedPeople []ConnectedPerson, found bool, err error) {
+func (cd cypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, resultLimit int, minimumConnections int, contentLimit int) (connectedPeople []ConnectedPerson, found bool, err error) {
 	results := []neoConnectedPeopleReadStruct{}
 
 	statement := `
@@ -31,7 +30,7 @@ func (pcw CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDate
 	WITH p2.uuid as uuid, p2.prefLabel as prefLabel, cm as count, content as contentList
 	RETURN prefLabel, uuid, count, contentList
 	ORDER BY count DESC LIMIT {limit}`
-	//thing := Thing{}
+
 	query := &neoism.CypherQuery{
 		Statement: statement,
 		Parameters: neoism.Props{
@@ -39,33 +38,30 @@ func (pcw CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDate
 			"fromDate":           fromDateEpoch,
 			"toDate":             toDateEpoch,
 			"minimumConnections": minimumConnections,
-			"limit":              limit,
+			"limit":              resultLimit,
 			"contentLimit":       contentLimit,
 		},
 		Result: &results,
 	}
-	err = pcw.db.Cypher(query)
-	if err != nil {
+	log.Debugf("Query %v", query)
+
+	if err = cd.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 {
 		log.Errorf(`Error finding people with more than %v connections to person with uuid %v
-      between %v and %v with the following statement: %v  Error: %v`, limit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
-		return []ConnectedPerson{}, false, fmt.Errorf("Error finding people with more than %v connections to person with uuid %v between %v and %v with the following statement: %v  Error: %v", limit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
-	}
-	log.Infof("CypherResult connectedPeople was (fromDate=%v, toDate=%v): %+v", fromDateEpoch, toDateEpoch, results)
-	if (len(results)) == 0 {
-		return []ConnectedPerson{}, false, nil
+      between %v and %v with the following statement: %v  Error: %v`, resultLimit, uuid, fromDateEpoch, toDateEpoch, query.Statement, err)
+		return []ConnectedPerson{}, false, err
 	}
 
-	connectedPeopleResults := neoReadStructToConnectedPeople(&results, pcw.env)
+	connectedPeopleResults := neoReadStructToConnectedPeople(&results)
+	log.Infof("Result: %v\n", connectedPeopleResults)
 
-	log.Infof("Returning %v", connectedPeopleResults)
 	return connectedPeopleResults, true, nil
 }
 
-func neoReadStructToConnectedPeople(neo *[]neoConnectedPeopleReadStruct, env string) []ConnectedPerson {
+func neoReadStructToConnectedPeople(neo *[]neoConnectedPeopleReadStruct) []ConnectedPerson {
 	connectedPeople := []ConnectedPerson{}
 	for _, neoCP := range *neo {
 		var connectedPerson = ConnectedPerson{}
-		connectedPerson.Person.APIURL = mapper.APIURL(neoCP.UUID, []string{"Person"}, env)
+		connectedPerson.Person.APIURL = mapper.APIURL(neoCP.UUID, []string{"Person"}, "local")
 		connectedPerson.Person.ID = mapper.IDURL(neoCP.UUID)
 		connectedPerson.Person.PrefLabel = neoCP.PrefLabel
 		connectedPerson.Count = neoCP.Count
@@ -76,7 +72,7 @@ func neoReadStructToConnectedPeople(neo *[]neoConnectedPeopleReadStruct, env str
 			var content = Content{}
 			content.ID = neoContent.UUID
 			content.Title = neoContent.PrefLabel
-			content.APIURL = mapper.APIURL(neoContent.UUID, []string{"Content"}, env)
+			content.APIURL = mapper.APIURL(neoContent.UUID, []string{"Content"}, "local")
 			contentList = append(contentList, content)
 		}
 		connectedPerson.Content = contentList
