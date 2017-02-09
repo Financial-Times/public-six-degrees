@@ -206,14 +206,14 @@ func getExpectedConnectedPeople() []ConnectedPerson {
 			Count: 2,
 			Content: []Content{
 				{
-					ID:     "a435b4ec-b207-4dce-ac0a-f8e7bbef310b",
-					APIURL: "http://api.ft.com/content/a435b4ec-b207-4dce-ac0a-f8e7bbef310b",
-					Title:  "Learn Golang",
-				},
-				{
 					ID:     "3fc9fe3e-af8c-4f7f-961a-e5065392bb31",
 					APIURL: "http://api.ft.com/content/3fc9fe3e-af8c-4f7f-961a-e5065392bb31",
 					Title:  "Bitcoin story makes Newsweek the headline",
+				},
+				{
+					ID:     "a435b4ec-b207-4dce-ac0a-f8e7bbef310b",
+					APIURL: "http://api.ft.com/content/a435b4ec-b207-4dce-ac0a-f8e7bbef310b",
+					Title:  "Learn Golang",
 				},
 			},
 		},
@@ -223,12 +223,12 @@ func getExpectedConnectedPeople() []ConnectedPerson {
 func getExpectedMostMentionedPeople() []Thing {
 	return []Thing{
 		{
-			ID:        fmt.Sprintf("http://api.ft.com/things/%s", personSiobhanMordenUUID),
-			PrefLabel: "Siobhan Morden",
-		},
-		{
 			ID:        fmt.Sprintf("http://api.ft.com/things/%s", personBorisJohnsonUUID),
 			PrefLabel: "Boris Johnson",
+		},
+		{
+			ID:        fmt.Sprintf("http://api.ft.com/things/%s", personSiobhanMordenUUID),
+			PrefLabel: "Siobhan Morden",
 		},
 	}
 }
@@ -264,7 +264,7 @@ func getDatabaseConnection(t *testing.T) neoutils.NeoConnection {
 func cleanDB(db neoutils.NeoConnection, t *testing.T) {
 	qs := []*neoism.CypherQuery{
 		{
-			Statement: "MATCH a DETACH DELETE a",
+			Statement: "MATCH (a) DETACH DELETE a",
 		},
 	}
 	err := db.CypherBatch(qs)
