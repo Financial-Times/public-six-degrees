@@ -1,0 +1,117 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"path": "appengine",
+			"revision": ""
+		},
+		{
+			"path": "appengine/aetest",
+			"revision": ""
+		},
+		{
+			"path": "appengine/urlfetch",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "ibld3tkf8qmEKpF69JI4mrSN0T8=",
+			"path": "github.com/Financial-Times/neo-utils-go/neoutils",
+			"revision": "5cb1750096545b3c8f7384326247e3e30996a905",
+			"revisionTime": "2017-08-22T15:20:35Z",
+			"version": "1.0.2",
+			"versionExact": "1.0.2"
+		},
+		{
+			"checksumSHA1": "diw1KueSVzsMHPCNDvj+xQiXSTE=",
+			"path": "github.com/Financial-Times/up-rw-app-api-go/rwapi",
+			"revision": "d9d93a1f689538313d12fee6f5f10715cfe280e0",
+			"revisionTime": "2017-07-10T12:58:28Z"
+		},
+		{
+			"checksumSHA1": "mrz/kicZiUaHxkyfvC/DyQcr8Do=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "a476722483882dd40b8111f0eb64e1d7f43f56e4",
+			"revisionTime": "2017-08-29T19:49:58Z"
+		},
+		{
+			"checksumSHA1": "nMm7xgpbpYYWy/zdKttNSoo1HAE=",
+			"path": "github.com/jmcvetta/neoism",
+			"revision": "4674154f870d19b356581843f481dccd6792dcc0",
+			"revisionTime": "2017-03-06T10:41:37Z"
+		},
+		{
+			"checksumSHA1": "khL6oKjx81rAZKW+36050b7f5As=",
+			"path": "github.com/jmcvetta/randutil",
+			"revision": "2bb1b664bcff821e02b2a0644cd29c7e824d54f8",
+			"revisionTime": "2015-08-17T12:26:01Z"
+		},
+		{
+			"checksumSHA1": "eOXF2PEvYLMeD8DSzLZJWbjYzco=",
+			"path": "github.com/kr/pretty",
+			"revision": "cfb55aafdaf3ec08f0db22699ab822c50091b1c4",
+			"revisionTime": "2016-08-23T17:07:15Z"
+		},
+		{
+			"checksumSHA1": "uulQHQ7IsRKqDudBC8Go9J0gtAc=",
+			"path": "github.com/kr/text",
+			"revision": "7cafcd837844e784b526369c9bce262804aebc60",
+			"revisionTime": "2016-05-04T02:26:26Z"
+		},
+		{
+			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
+			"path": "github.com/pmezard/go-difflib/difflib",
+			"revision": "792786c7400a136282c1664665ae0a8db921c6c2",
+			"revisionTime": "2016-01-10T10:55:54Z"
+		},
+		{
+			"checksumSHA1": "KAzbLjI9MzW2tjfcAsK75lVRp6I=",
+			"path": "github.com/rcrowley/go-metrics",
+			"revision": "1f30fe9094a513ce4c700b9a54458bbb0c96996c",
+			"revisionTime": "2016-11-28T21:05:44Z"
+		},
+		{
+			"checksumSHA1": "BYvROBsiyAXK4sq6yhDe8RgT4LM=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "89742aefa4b206dcf400792f3bd35b542998eb3b",
+			"revisionTime": "2017-08-22T13:27:46Z"
+		},
+		{
+			"checksumSHA1": "mGbTYZ8dHVTiPTTJu3ktp+84pPI=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "890a5c3458b43e6104ff5da8dfa139d013d77544",
+			"revisionTime": "2017-07-05T02:17:15Z"
+		},
+		{
+			"checksumSHA1": "dBmk68coq8umF51FL23vNXOOS7o=",
+			"path": "go4.org/osutil",
+			"revision": "034d17a462f7b2dcd1a4a73553ec5357ff6e6c6e",
+			"revisionTime": "2017-05-24T23:16:39Z"
+		},
+		{
+			"checksumSHA1": "nqWNlnMmVpt628zzvyo6Yv2CX5Q=",
+			"path": "golang.org/x/crypto/ssh/terminal",
+			"revision": "7d9177d70076375b9a59c8fde23d52d9c4a7ecd5",
+			"revisionTime": "2017-09-15T19:08:28Z"
+		},
+		{
+			"checksumSHA1": "ZWgtYdxJbBEFnRbrdVOi7QrQVdc=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "b6e1ae21643682ce023deb8d152024597b0e9bb4",
+			"revisionTime": "2017-09-18T15:00:50Z"
+		},
+		{
+			"checksumSHA1": "pBPFzDGt3AVSRffB7ffiUnruFUk=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "b6e1ae21643682ce023deb8d152024597b0e9bb4",
+			"revisionTime": "2017-09-18T15:00:50Z"
+		},
+		{
+			"checksumSHA1": "k3L1Q7anlDsX2njPAE5Dd2SWVlw=",
+			"path": "gopkg.in/jmcvetta/napping.v3",
+			"revision": "4c7b4b235c63152afa9a1c6384e708e0fbfd77ca",
+			"revisionTime": "2017-03-11T05:32:04Z"
+		}
+	],
+	"rootPath": "github.com/Financial-Times/public-six-degrees"
+}
