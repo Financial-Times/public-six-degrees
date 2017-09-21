@@ -29,6 +29,24 @@
 			"revisionTime": "2016-09-09T09:52:18Z"
 		},
 		{
+			"checksumSHA1": "VeiFOeyXR0gDInIDSlZEa1A66OQ=",
+			"path": "github.com/Financial-Times/content-rw-neo4j",
+			"revision": "888ff9466c707978652a6227c2a2680da884bec1",
+			"revisionTime": "2017-03-22T12:17:00Z"
+		},
+		{
+			"checksumSHA1": "8YCSHwzaaVCLfmu2FWSPbNdy7/Q=",
+			"path": "github.com/Financial-Times/content-rw-neo4j/content",
+			"revision": "888ff9466c707978652a6227c2a2680da884bec1",
+			"revisionTime": "2017-03-22T12:17:00Z"
+		},
+		{
+			"checksumSHA1": "FUhczVSvt/VQAlWfzATo1YLez2E=",
+			"path": "github.com/Financial-Times/go-fthealth/v1a",
+			"revision": "e7ccca038327a0091303a52445ec1f0fb66cb97b",
+			"revisionTime": "2017-05-25T09:50:41Z"
+		},
+		{
 			"checksumSHA1": "zUpINnstJChGK0LAtkt7jBc3RY0=",
 			"path": "github.com/Financial-Times/http-handlers-go/httphandlers",
 			"revision": "bb69c454da9050fe1c4b92fe1345a01583ee70be",
@@ -45,6 +63,14 @@
 			"path": "github.com/Financial-Times/neo-utils-go/neoutils",
 			"revision": "aed125896a5ac0b50296fde5faefed1ebfa7fae3",
 			"revisionTime": "2017-01-04T12:16:44Z"
+		},
+		{
+			"checksumSHA1": "aTbE6j4aUuXSwiuoDeHf+IEw6hA=",
+			"path": "github.com/Financial-Times/people-rw-neo4j/people",
+			"revision": "13429d84f39603e6957694a0ea75134a495999f5",
+			"revisionTime": "2017-02-14T11:11:06Z",
+			"version": "0.1.9",
+			"versionExact": "0.1.9"
 		},
 		{
 			"checksumSHA1": "fqpohN7Qp2qj7TLMbUxh/cK4oH0=",
@@ -77,10 +103,10 @@
 			"revisionTime": "2016-08-24T12:50:00Z"
 		},
 		{
-			"checksumSHA1": "9cl7+wv0GvxpQV+HOtV93F9pbmE=",
+			"checksumSHA1": "z9ckOyaoHErgXLQDx514AOMxdeo=",
 			"path": "github.com/Sirupsen/logrus",
-			"revision": "89742aefa4b206dcf400792f3bd35b542998eb3b",
-			"revisionTime": "2017-08-22T13:27:46Z"
+			"revision": "abc6f20dabf4b10195f233ad21ea6c5ba33acae0",
+			"revisionTime": "2016-11-11T12:09:51Z"
 		},
 		{
 			"checksumSHA1": "/6H1rhQmbq8mEP29pnmLmdwBKUE=",
@@ -111,6 +137,12 @@
 			"path": "github.com/hashicorp/go-version",
 			"revision": "fc61389e27c71d120f87031ca8c88a3428f372dd",
 			"revisionTime": "2017-09-14T15:41:28Z"
+		},
+		{
+			"checksumSHA1": "I7AAXZqD3Dy5KjQ9N+2/iHzlKzc=",
+			"path": "github.com/jawher/mow.cli",
+			"revision": "a459d5906bb7a9c5eda7c4d02eec7c541120226e",
+			"revisionTime": "2017-08-20T16:57:35Z"
 		},
 		{
 			"checksumSHA1": "nMm7xgpbpYYWy/zdKttNSoo1HAE=",
@@ -149,10 +181,22 @@
 			"revisionTime": "2016-11-28T21:05:44Z"
 		},
 		{
+			"checksumSHA1": "jAzqolwnRJhHsKXmmvKNrHqxqAw=",
+			"path": "github.com/spaolacci/murmur3",
+			"revision": "9f5d223c60793748f04a9d5b4b4eacddfc1f755d",
+			"revisionTime": "2017-08-19T07:11:01Z"
+		},
+		{
 			"checksumSHA1": "mGbTYZ8dHVTiPTTJu3ktp+84pPI=",
 			"path": "github.com/stretchr/testify/assert",
 			"revision": "890a5c3458b43e6104ff5da8dfa139d013d77544",
 			"revisionTime": "2017-07-05T02:17:15Z"
+		},
+		{
+			"checksumSHA1": "iG2B2A82ztGrpp3VVNyR5/Xzp0w=",
+			"path": "github.com/ugorji/go/codec",
+			"revision": "54210f4e076c57f351166f0ed60e67d3fca57a36",
+			"revisionTime": "2017-09-18T22:25:52Z"
 		},
 		{
 			"checksumSHA1": "dBmk68coq8umF51FL23vNXOOS7o=",
