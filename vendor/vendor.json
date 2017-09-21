@@ -193,6 +193,12 @@
 			"revisionTime": "2017-07-05T02:17:15Z"
 		},
 		{
+			"checksumSHA1": "2PpOCNkWnshDrXeCVH2kp3VHhIM=",
+			"path": "github.com/stretchr/testify/require",
+			"revision": "4d4bfba8f1d1027c4fdbe371823030df51419987",
+			"revisionTime": "2017-01-30T11:31:45Z"
+		},
+		{
 			"checksumSHA1": "iG2B2A82ztGrpp3VVNyR5/Xzp0w=",
 			"path": "github.com/ugorji/go/codec",
 			"revision": "54210f4e076c57f351166f0ed60e67d3fca57a36",
