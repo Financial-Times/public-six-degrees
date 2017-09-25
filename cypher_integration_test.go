@@ -245,7 +245,7 @@ func writeJSONToAnnotationsService(service annrw.Service, contentUUID string, pa
 	dec := json.NewDecoder(f)
 	inst, err := service.DecodeJSON(dec)
 	assert.NoError(t, err, "Error parsing file %s", pathToJSONFile)
-	err = service.Write(contentUUID, "v2", "", "trans_id", inst)
+	err = service.Write(contentUUID, "annotations-v2", "v2", "trans_id", inst)
 	assert.NoError(t, err)
 }
 

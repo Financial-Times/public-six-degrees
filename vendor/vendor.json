@@ -15,12 +15,12 @@
 			"revision": ""
 		},
 		{
-			"checksumSHA1": "JRTXOY4qgGJhOh3AveZBgYz7W3A=",
+			"checksumSHA1": "FwukXGS540jaUS6MBwLWobiOgCQ=",
 			"path": "github.com/Financial-Times/annotations-rw-neo4j/annotations",
-			"revision": "9f6ef5ae4ae171e937e24a1468e10492d913a80b",
-			"revisionTime": "2017-09-20T13:12:11Z",
-			"version": "2.1.1",
-			"versionExact": "2.1.1"
+			"revision": "4a3a669d5efc033b7fed28cd6147039020083a22",
+			"revisionTime": "2017-09-08T13:11:55Z",
+			"version": "1.2.0",
+			"versionExact": "1.2.0"
 		},
 		{
 			"checksumSHA1": "FfEWrE4sbtmtyeBTHCCF1q3QBxU=",
@@ -41,12 +41,6 @@
 			"path": "github.com/Financial-Times/go-fthealth/v1a",
 			"revision": "e7ccca038327a0091303a52445ec1f0fb66cb97b",
 			"revisionTime": "2017-05-25T09:50:41Z"
-		},
-		{
-			"checksumSHA1": "R32X8CuDAJV1JimomUEh9SFmc8s=",
-			"path": "github.com/Financial-Times/go-logger",
-			"revision": "83fc3e64dc5506fdb4e56b704949d157a121c76c",
-			"revisionTime": "2017-09-14T08:19:45Z"
 		},
 		{
 			"checksumSHA1": "dqF1g4reeLPNN10qTXgDJj3fHm4=",
