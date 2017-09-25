@@ -51,7 +51,8 @@ func TestConnectedPeople(t *testing.T) {
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", contentUUID), t)
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", content2UUID), t)
 
-	annotationsRW := annrw.NewCypherAnnotationsService(db, "v2")
+
+	annotationsRW := annrw.NewCypherAnnotationsService(db)
 	require.NoError(t, annotationsRW.Initialise())
 	writeJSONToAnnotationsService(annotationsRW, contentUUID, fmt.Sprintf("./fixtures/Annotations-%s-v2.json", contentUUID), t)
 	writeJSONToAnnotationsService(annotationsRW, content2UUID, fmt.Sprintf("./fixtures/Annotations-%s-v2.json", content2UUID), t)
@@ -118,7 +119,7 @@ func TestMostMentionedPeople(t *testing.T) {
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", contentUUID), t)
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", content2UUID), t)
 
-	annotationsRW := annrw.NewCypherAnnotationsService(db, "v2")
+	annotationsRW := annrw.NewCypherAnnotationsService(db)
 	require.NoError(t, annotationsRW.Initialise())
 	writeJSONToAnnotationsService(annotationsRW, contentUUID, fmt.Sprintf("./fixtures/Annotations-%s-v2.json", contentUUID), t)
 	writeJSONToAnnotationsService(annotationsRW, content2UUID, fmt.Sprintf("./fixtures/Annotations-%s-v2.json", content2UUID), t)
@@ -191,7 +192,7 @@ func writeJsonToService(service baseftrwapp.Service, pathToJsonFile string, t *t
 	dec := json.NewDecoder(f)
 	inst, _, err := service.DecodeJSON(dec)
 	assert.NoError(t, err)
-	err = service.Write(inst)
+	err = service.Write(inst, "trans_id")
 	require.NoError(t, err)
 }
 
@@ -244,7 +245,7 @@ func writeJSONToAnnotationsService(service annrw.Service, contentUUID string, pa
 	dec := json.NewDecoder(f)
 	inst, err := service.DecodeJSON(dec)
 	assert.NoError(t, err, "Error parsing file %s", pathToJSONFile)
-	err = service.Write(contentUUID, inst)
+	err = service.Write(contentUUID, "annotations-v2", "v2", "trans_id", inst)
 	assert.NoError(t, err)
 }
 
