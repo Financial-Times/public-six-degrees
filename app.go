@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
-	"github.com/Financial-Times/go-fthealth/v1a"
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
@@ -97,13 +97,21 @@ func runServer(neoURL string, port string, cacheDuration string) {
 	httpHandlers := httpHandlers{cypherDriver{conn}, cacheControlHeader}
 	r := router(httpHandlers)
 
-	http.HandleFunc("/__health", v1a.Handler("PublicSixDegrees Healthchecks",
-		"Checks for accessing neo4j", httpHandlers.HealthCheck()))
+	timedHC := fthealth.TimedHealthCheck{
+		HealthCheck: fthealth.HealthCheck{
+			SystemCode: "public-six-degrees-api",
+			Name: "Public Six Degrees API",
+			Description: "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
+			Checks: []fthealth.Check{httpHandlers.HealthCheck()},
+		},
+		Timeout: 10 * time.Second,
+	}
+	http.HandleFunc("/__health", fthealth.Handler(timedHC))
 	http.HandleFunc(status.PingPath, status.PingHandler)
 	http.HandleFunc(status.PingPathDW, status.PingHandler)
 	http.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
 	http.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
-	http.HandleFunc("/__gtg", httpHandlers.GoodToGo)
+	http.HandleFunc("/__gtg", status.NewGoodToGoHandler(httpHandlers.GTG))
 	http.Handle("/", r)
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {

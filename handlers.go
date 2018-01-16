@@ -8,8 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Financial-Times/go-fthealth/v1a"
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	log "github.com/sirupsen/logrus"
+	"github.com/Financial-Times/service-status-go/gtg"
 )
 
 const (
@@ -26,8 +27,8 @@ type httpHandlers struct {
 	cacheControlHeader string
 }
 
-func (hh *httpHandlers) HealthCheck() v1a.Check {
-	return v1a.Check{
+func (hh *httpHandlers) HealthCheck() fthealth.Check {
+	return fthealth.Check{
 		BusinessImpact:   "Unable to respond to Public Six Degrees",
 		Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
 		PanicGuide:       "https://dewey.ft.com/public-six-degrees-api.html",
@@ -45,12 +46,19 @@ func (hh *httpHandlers) Checker() (string, error) {
 	return "Error connecting to neo4j", err
 }
 
-//GoodToGo returns a 503 if the healthcheck fails - suitable for use from varnish to check availability of a node
-func (hh *httpHandlers) GoodToGo(writer http.ResponseWriter, req *http.Request) {
-	if _, err := hh.Checker(); err != nil {
-		writer.WriteHeader(http.StatusServiceUnavailable)
+func (hh *httpHandlers) GTG() gtg.Status {
+	statusCheck := func() gtg.Status {
+		return gtgCheck(hh.Checker)
 	}
 
+	return gtg.FailFastParallelCheck([]gtg.StatusChecker{statusCheck})()
+}
+
+func gtgCheck(handler func() (string, error)) gtg.Status {
+	if _, err := handler(); err != nil {
+		return gtg.Status{GoodToGo: false, Message: err.Error()}
+	}
+	return gtg.Status{GoodToGo: true}
 }
 
 func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
