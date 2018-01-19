@@ -11,7 +11,7 @@ image:
 env:
   graphitePrefix: coco.services.k8s.public-six-degrees-api
 resources:
+  requests:
+    memory: 32Mi
   limits:
-    memory: 256Mi
-
-
+    memory: 128Mi

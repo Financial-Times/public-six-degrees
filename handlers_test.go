@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Financial-Times/go-fthealth/v1a"
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
@@ -323,6 +323,59 @@ func TestGetMostMentionedPeople(t *testing.T) {
 }
 func TestCheckConnectivity(t *testing.T) {
 	assert := assert.New(t)
+
+	timeTemplate := "2006-01-02T15:04:05.000Z"
+
+	testSuccessTimeStr := "2016-12-13T16:03:31.2382547+02:00"
+	testSuccessTime, _ := time.Parse(timeTemplate, testSuccessTimeStr)
+
+	testSuccessResponse := fthealth.HealthResult{
+		SchemaVersion: 1,
+		SystemCode: "public-six-degrees-api",
+		Name: "Public Six Degrees API",
+		Description: "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
+		Ok: true,
+		Checks: []fthealth.CheckResult{
+			{
+				Name: "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
+				Ok: true,
+				Severity: 1,
+				BusinessImpact: "Unable to respond to Public Six Degrees",
+				PanicGuide: "https://dewey.ft.com/public-six-degrees-api.html",
+				TechnicalSummary: "Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find\n\t\t\t\tthe neoUrl as a parameter in hieradata for this service.",
+				CheckOutput: "Connectivity to neo4j is ok",
+				LastUpdated: testSuccessTime,
+			},
+		},
+	}
+
+	testErrorTimeStr := "2016-12-13T16:03:31.2387546+02:00"
+	testErrorTime, _ := time.Parse(timeTemplate, testErrorTimeStr)
+
+	testErrorResponse := fthealth.HealthResult{
+		SchemaVersion: 1,
+		SystemCode: "public-six-degrees-api",
+		Name: "Public Six Degrees API",
+		Description: "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
+		Ok: false,
+		Severity: 1,
+		Checks: []fthealth.CheckResult{
+			{
+				Name: "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
+				Ok: false,
+				Severity: 1,
+				BusinessImpact: "Unable to respond to Public Six Degrees",
+				PanicGuide: "https://dewey.ft.com/public-six-degrees-api.html",
+				TechnicalSummary: "Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find\n\t\t\t\tthe neoUrl as a parameter in hieradata for this service.",
+				CheckOutput: "Error connecting to neo4j",
+				LastUpdated: testErrorTime,
+			},
+		},
+	}
+
+	testSuccessResponseStr, _ := json.Marshal(testSuccessResponse)
+	testErrorResponseStr, _ := json.Marshal(testErrorResponse)
+
 	tests := []handlerTestCase{
 		{
 			name:        "HealthSuccess",
@@ -330,7 +383,7 @@ func TestCheckConnectivity(t *testing.T) {
 			driver:      &dummyDriver{},
 			statusCode:  http.StatusOK,
 			contentType: "",
-			body:        `{"checks":[{"businessImpact":"Unable to respond to Public Six Degrees","checkOutput":"Connectivity to neo4j is ok","lastUpdated":"2016-12-13T16:03:31.2382547+02:00","name":"Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service","ok":true,"panicGuide":"https://dewey.ft.com/public-six-degrees-api.html","severity":1,"technicalSummary":"Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find\n\t\t\t\tthe neoUrl as a parameter in hieradata for this service. "}],"description":"Checks for accessing neo4j","name":"PublicSixDegrees Healthchecks","schemaVersion":1,"ok":true}`,
+			body:        string(testSuccessResponseStr),
 		},
 		{
 			name:        "HealthError",
@@ -338,7 +391,7 @@ func TestCheckConnectivity(t *testing.T) {
 			driver:      &dummyDriver{shouldFail: true},
 			statusCode:  http.StatusOK,
 			contentType: "",
-			body:        `{"checks":[{"businessImpact":"Unable to respond to Public Six Degrees","checkOutput":"TEST failing check connectivity","lastUpdated":"2016-12-13T16:03:31.2387546+02:00","name":"Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service","ok":false,"panicGuide":"https://dewey.ft.com/public-six-degrees-api.html","severity":1,"technicalSummary":"Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find\n\t\t\t\tthe neoUrl as a parameter in hieradata for this service. "}],"description":"Checks for accessing neo4j","name":"PublicSixDegrees Healthchecks","schemaVersion":1,"ok":false,"severity":1}`,
+			body:		 string(testErrorResponseStr),
 		},
 	}
 
@@ -347,26 +400,41 @@ func TestCheckConnectivity(t *testing.T) {
 
 		httpHandler := httpHandlers{test.driver, "max-age=360, public"}
 		router := mux.NewRouter()
-		router.HandleFunc("/__health", v1a.Handler("PublicSixDegrees Healthchecks",
-			"Checks for accessing neo4j", httpHandler.HealthCheck()))
+
+		timedHC := fthealth.TimedHealthCheck{
+			HealthCheck: fthealth.HealthCheck{
+				SystemCode: "public-six-degrees-api",
+				Name: "Public Six Degrees API",
+				Description: "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
+				Checks: []fthealth.Check{httpHandler.HealthCheck()},
+			},
+			Timeout: 10 * time.Second,
+		}
+		router.HandleFunc("/__health", fthealth.Handler(timedHC))
 		router.ServeHTTP(rec, test.req)
 		assert.True(test.statusCode == rec.Code, fmt.Sprintf("%s: Wrong response code, was %d, should be %d", test.name, rec.Code, test.statusCode))
 
-		var actualCheckResult, expectedCheckResult v1a.CheckResult
-		json.Unmarshal([]byte(test.body), &expectedCheckResult)
-		err := json.Unmarshal([]byte(rec.Body.String()), &actualCheckResult)
+		var actualHealthResult, expectedHealthResult fthealth.HealthResult
+		json.Unmarshal([]byte(test.body), &expectedHealthResult)
+		err := json.Unmarshal([]byte(rec.Body.String()), &actualHealthResult)
 		assert.NoError(err, fmt.Sprintf("%s: Parse error for body", test.name))
 
-		assert.Equal(expectedCheckResult.Ack, actualCheckResult.Ack)
-		assert.Equal(expectedCheckResult.BusinessImpact, actualCheckResult.BusinessImpact)
-		assert.Equal(expectedCheckResult.Name, actualCheckResult.Name)
-		assert.Equal(expectedCheckResult.Ok, actualCheckResult.Ok)
-		assert.Equal(expectedCheckResult.Output, actualCheckResult.Output)
-		assert.Equal(expectedCheckResult.PanicGuide, actualCheckResult.PanicGuide)
-		assert.Equal(expectedCheckResult.Severity, actualCheckResult.Severity)
-		assert.Equal(expectedCheckResult.TechnicalSummary, actualCheckResult.TechnicalSummary)
-		assert.WithinDuration(expectedCheckResult.LastUpdated, actualCheckResult.LastUpdated, 3*time.Second)
+		assert.Equal(expectedHealthResult.SchemaVersion, actualHealthResult.SchemaVersion)
+		assert.Equal(expectedHealthResult.SystemCode, actualHealthResult.SystemCode)
+		assert.Equal(expectedHealthResult.Name, actualHealthResult.Name)
+		assert.Equal(expectedHealthResult.Description, actualHealthResult.Description)
+		assert.Equal(expectedHealthResult.Ok, actualHealthResult.Ok)
+		assert.Equal(expectedHealthResult.Severity, actualHealthResult.Severity)
 
+		assert.Equal(expectedHealthResult.Checks[0].Ack, expectedHealthResult.Checks[0].Ack)
+		assert.Equal(expectedHealthResult.Checks[0].BusinessImpact, expectedHealthResult.Checks[0].BusinessImpact)
+		assert.Equal(expectedHealthResult.Checks[0].Name, expectedHealthResult.Checks[0].Name)
+		assert.Equal(expectedHealthResult.Checks[0].Ok, expectedHealthResult.Checks[0].Ok)
+		assert.Equal(expectedHealthResult.Checks[0].CheckOutput, expectedHealthResult.Checks[0].CheckOutput)
+		assert.Equal(expectedHealthResult.Checks[0].PanicGuide, expectedHealthResult.Checks[0].PanicGuide)
+		assert.Equal(expectedHealthResult.Checks[0].Severity, expectedHealthResult.Checks[0].Severity)
+		assert.Equal(expectedHealthResult.Checks[0].TechnicalSummary, expectedHealthResult.Checks[0].TechnicalSummary)
+		assert.WithinDuration(expectedHealthResult.Checks[0].LastUpdated, expectedHealthResult.Checks[0].LastUpdated, 3*time.Second)
 	}
 }
 
