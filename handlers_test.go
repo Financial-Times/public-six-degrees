@@ -339,7 +339,7 @@ func TestCheckConnectivity(t *testing.T) {
 			{
 				Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
 				Ok:               true,
-				Severity:         2,
+				Severity:         3,
 				BusinessImpact:   "Unable to respond to Public Six Degrees",
 				PanicGuide:       "https://dewey.ft.com/public-six-degrees-api.html",
 				TechnicalSummary: "Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find\n\t\t\t\tthe neoUrl as a parameter in hieradata for this service.",
@@ -358,12 +358,12 @@ func TestCheckConnectivity(t *testing.T) {
 		Name:          "Public Six Degrees API",
 		Description:   "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
 		Ok:            false,
-		Severity:      2,
+		Severity:      3,
 		Checks: []fthealth.CheckResult{
 			{
 				Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
 				Ok:               false,
-				Severity:         2,
+				Severity:         3,
 				BusinessImpact:   "Unable to respond to Public Six Degrees",
 				PanicGuide:       "https://dewey.ft.com/public-six-degrees-api.html",
 				TechnicalSummary: "Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find\n\t\t\t\tthe neoUrl as a parameter in hieradata for this service.",
