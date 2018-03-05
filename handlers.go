@@ -9,8 +9,8 @@ import (
 	"time"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
-	log "github.com/sirupsen/logrus"
 	"github.com/Financial-Times/service-status-go/gtg"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -32,7 +32,7 @@ func (hh *httpHandlers) HealthCheck() fthealth.Check {
 		BusinessImpact:   "Unable to respond to Public Six Degrees",
 		Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
 		PanicGuide:       "https://dewey.ft.com/public-six-degrees-api.html",
-		Severity:         1,
+		Severity:         3,
 		TechnicalSummary: `Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running.`,
 		Checker:          hh.Checker,
 	}

@@ -331,20 +331,20 @@ func TestCheckConnectivity(t *testing.T) {
 
 	testSuccessResponse := fthealth.HealthResult{
 		SchemaVersion: 1,
-		SystemCode: "public-six-degrees-api",
-		Name: "Public Six Degrees API",
-		Description: "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
-		Ok: true,
+		SystemCode:    "public-six-degrees-api",
+		Name:          "Public Six Degrees API",
+		Description:   "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
+		Ok:            true,
 		Checks: []fthealth.CheckResult{
 			{
-				Name: "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
-				Ok: true,
-				Severity: 1,
-				BusinessImpact: "Unable to respond to Public Six Degrees",
-				PanicGuide: "https://dewey.ft.com/public-six-degrees-api.html",
+				Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
+				Ok:               true,
+				Severity:         3,
+				BusinessImpact:   "Unable to respond to Public Six Degrees",
+				PanicGuide:       "https://dewey.ft.com/public-six-degrees-api.html",
 				TechnicalSummary: "Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find\n\t\t\t\tthe neoUrl as a parameter in hieradata for this service.",
-				CheckOutput: "Connectivity to neo4j is ok",
-				LastUpdated: testSuccessTime,
+				CheckOutput:      "Connectivity to neo4j is ok",
+				LastUpdated:      testSuccessTime,
 			},
 		},
 	}
@@ -354,21 +354,21 @@ func TestCheckConnectivity(t *testing.T) {
 
 	testErrorResponse := fthealth.HealthResult{
 		SchemaVersion: 1,
-		SystemCode: "public-six-degrees-api",
-		Name: "Public Six Degrees API",
-		Description: "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
-		Ok: false,
-		Severity: 1,
+		SystemCode:    "public-six-degrees-api",
+		Name:          "Public Six Degrees API",
+		Description:   "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
+		Ok:            false,
+		Severity:      3,
 		Checks: []fthealth.CheckResult{
 			{
-				Name: "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
-				Ok: false,
-				Severity: 1,
-				BusinessImpact: "Unable to respond to Public Six Degrees",
-				PanicGuide: "https://dewey.ft.com/public-six-degrees-api.html",
+				Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
+				Ok:               false,
+				Severity:         3,
+				BusinessImpact:   "Unable to respond to Public Six Degrees",
+				PanicGuide:       "https://dewey.ft.com/public-six-degrees-api.html",
 				TechnicalSummary: "Cannot connect to Neo4j. If this check fails, check that Neo4j instance is up and running. You can find\n\t\t\t\tthe neoUrl as a parameter in hieradata for this service.",
-				CheckOutput: "Error connecting to neo4j",
-				LastUpdated: testErrorTime,
+				CheckOutput:      "Error connecting to neo4j",
+				LastUpdated:      testErrorTime,
 			},
 		},
 	}
@@ -391,7 +391,7 @@ func TestCheckConnectivity(t *testing.T) {
 			driver:      &dummyDriver{shouldFail: true},
 			statusCode:  http.StatusOK,
 			contentType: "",
-			body:		 string(testErrorResponseStr),
+			body:        string(testErrorResponseStr),
 		},
 	}
 
@@ -403,10 +403,10 @@ func TestCheckConnectivity(t *testing.T) {
 
 		timedHC := fthealth.TimedHealthCheck{
 			HealthCheck: fthealth.HealthCheck{
-				SystemCode: "public-six-degrees-api",
-				Name: "Public Six Degrees API",
+				SystemCode:  "public-six-degrees-api",
+				Name:        "Public Six Degrees API",
 				Description: "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
-				Checks: []fthealth.Check{httpHandler.HealthCheck()},
+				Checks:      []fthealth.Check{httpHandler.HealthCheck()},
 			},
 			Timeout: 10 * time.Second,
 		}
