@@ -5,11 +5,6 @@
 Provides a public API for retrieving most mentioned people and connected people for the 'Six degrees' application.
 Connects to Neo4j to get the needed data.
 
-## Build & deployment
-
-* Build in DockerHub: https://hub.docker.com/r/coco/public-six-degrees/builds/
-* Deployed in delivery cluster: https://github.com/Financial-Times/up-service-files/blob/master/public-six-degrees%40.service
-
 ## Installation & running locally
 
 * `go get -u -t github.com/Financial-Times/public-six-degrees`
