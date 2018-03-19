@@ -8,7 +8,7 @@ Connects to Neo4j to get the needed data.
 ## Build & deployment
 
 * Build in DockerHub: https://hub.docker.com/r/coco/public-six-degrees/builds/
-* Deployed in delivery cluster: https://github.com/Financial-Times/up-service-files/blob/master/public-six-degrees%40.service
+* Deployed in delivery cluster: https://upp-k8s-jenkins.in.ft.com/job/k8s-deployment/job/apps-deployment/job/public-six-degrees-api-auto-deploy/
 
 ## Installation & running locally
 
