@@ -7,14 +7,15 @@ import (
 	"testing"
 	"time"
 
-	annrw "github.com/Financial-Times/annotations-rw-neo4j/annotations"
-	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
-	cnt "github.com/Financial-Times/content-rw-neo4j/content"
-	"github.com/Financial-Times/neo-utils-go/neoutils"
-	person "github.com/Financial-Times/people-rw-neo4j/people"
 	"github.com/jmcvetta/neoism"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Financial-Times/annotations-rw-neo4j/annotations"
+	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
+	"github.com/Financial-Times/concepts-rw-neo4j/concepts"
+	"github.com/Financial-Times/content-rw-neo4j/content"
+	"github.com/Financial-Times/neo-utils-go/neoutils"
 )
 
 const (
@@ -41,17 +42,17 @@ func TestConnectedPeople(t *testing.T) {
 	cleanDB(db, t)
 	defer cleanDB(db, t)
 
-	peopleRW := person.NewCypherPeopleService(db)
-	require.NoError(t, peopleRW.Initialise())
-	writeJsonToService(peopleRW, fmt.Sprintf("./fixtures/Person-Siobhan_Morden-%s.json", personSiobhanMordenUUID), t)
-	writeJsonToService(peopleRW, fmt.Sprintf("./fixtures/Person-Boris_Johnson-%s.json", personBorisJohnsonUUID), t)
+	conceptsRW := concepts.NewConceptService(db)
+	require.NoError(t, conceptsRW.Initialise())
+	writeJsonToConceptsService(&conceptsRW, fmt.Sprintf("./fixtures/Person-Siobhan_Morden-%s.json", personSiobhanMordenUUID), t)
+	writeJsonToConceptsService(&conceptsRW, fmt.Sprintf("./fixtures/Person-Boris_Johnson-%s.json", personBorisJohnsonUUID), t)
 
-	contentRW := cnt.NewCypherContentService(db)
+	contentRW := content.NewCypherContentService(db)
 	require.NoError(t, contentRW.Initialise())
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", contentUUID), t)
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", content2UUID), t)
 
-	annotationsRW := annrw.NewCypherAnnotationsService(db)
+	annotationsRW := annotations.NewCypherAnnotationsService(db)
 	require.NoError(t, annotationsRW.Initialise())
 	writeJSONToAnnotationsService(annotationsRW, contentUUID, fmt.Sprintf("./fixtures/Annotations-%s-v2.json", contentUUID), t)
 	writeJSONToAnnotationsService(annotationsRW, content2UUID, fmt.Sprintf("./fixtures/Annotations-%s-v2.json", content2UUID), t)
@@ -108,17 +109,17 @@ func TestMostMentionedPeople(t *testing.T) {
 	cleanDB(db, t)
 	defer cleanDB(db, t)
 
-	peopleRW := person.NewCypherPeopleService(db)
-	require.NoError(t, peopleRW.Initialise())
-	writeJsonToService(peopleRW, fmt.Sprintf("./fixtures/Person-Siobhan_Morden-%s.json", personSiobhanMordenUUID), t)
-	writeJsonToService(peopleRW, fmt.Sprintf("./fixtures/Person-Boris_Johnson-%s.json", personBorisJohnsonUUID), t)
+	conceptsRW := concepts.NewConceptService(db)
+	require.NoError(t, conceptsRW.Initialise())
+	writeJsonToConceptsService(&conceptsRW, fmt.Sprintf("./fixtures/Person-Siobhan_Morden-%s.json", personSiobhanMordenUUID), t)
+	writeJsonToConceptsService(&conceptsRW, fmt.Sprintf("./fixtures/Person-Boris_Johnson-%s.json", personBorisJohnsonUUID), t)
 
-	contentRW := cnt.NewCypherContentService(db)
+	contentRW := content.NewCypherContentService(db)
 	require.NoError(t, contentRW.Initialise())
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", contentUUID), t)
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", content2UUID), t)
 
-	annotationsRW := annrw.NewCypherAnnotationsService(db)
+	annotationsRW := annotations.NewCypherAnnotationsService(db)
 	require.NoError(t, annotationsRW.Initialise())
 	writeJSONToAnnotationsService(annotationsRW, contentUUID, fmt.Sprintf("./fixtures/Annotations-%s-v2.json", contentUUID), t)
 	writeJSONToAnnotationsService(annotationsRW, content2UUID, fmt.Sprintf("./fixtures/Annotations-%s-v2.json", content2UUID), t)
@@ -195,6 +196,16 @@ func writeJsonToService(service baseftrwapp.Service, pathToJsonFile string, t *t
 	require.NoError(t, err)
 }
 
+func writeJsonToConceptsService(service concepts.ConceptServicer, pathToJsonFile string, t *testing.T) {
+	f, err := os.Open(pathToJsonFile)
+	assert.NoError(t, err)
+	dec := json.NewDecoder(f)
+	inst, _, err := service.DecodeJSON(dec)
+	assert.NoError(t, err)
+	_, err = service.Write(inst, "trans_id")
+	require.NoError(t, err)
+}
+
 func getExpectedConnectedPeople() []ConnectedPerson {
 	return []ConnectedPerson{
 		{
@@ -238,7 +249,7 @@ func getTimeEpoch(date string) int64 {
 	return t.Unix()
 }
 
-func writeJSONToAnnotationsService(service annrw.Service, contentUUID string, pathToJSONFile string, t *testing.T) {
+func writeJSONToAnnotationsService(service annotations.Service, contentUUID string, pathToJSONFile string, t *testing.T) {
 	f, err := os.Open(pathToJSONFile)
 	assert.NoError(t, err)
 	dec := json.NewDecoder(f)
