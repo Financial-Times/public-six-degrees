@@ -9,13 +9,12 @@ import (
 
 	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
-	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
+	"github.com/Financial-Times/public-six-degrees/sixdegrees"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
-	log "github.com/sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/jawher/mow.cli"
-	"github.com/rcrowley/go-metrics"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -94,15 +93,17 @@ func runServer(neoURL string, port string, cacheDuration string) {
 		log.Fatalf("Error connecting to neo4j %s", err)
 	}
 
-	httpHandlers := httpHandlers{cypherDriver{conn}, cacheControlHeader}
-	r := router(httpHandlers)
+	driver := sixdegrees.NewCypherDriver(conn)
+	handler := sixdegrees.NewHandler(driver, cacheControlHeader)
+	router := mux.NewRouter()
+	handler.RegisterHandlers(router)
 
 	timedHC := fthealth.TimedHealthCheck{
 		HealthCheck: fthealth.HealthCheck{
-			SystemCode: "public-six-degrees-api",
-			Name: "Public Six Degrees API",
+			SystemCode:  "public-six-degrees-api",
+			Name:        "Public Six Degrees API",
 			Description: "Six Degrees Backend provides mostMentionedPeople and connectedPeople endpoints for Six Degrees Frontend.",
-			Checks: []fthealth.Check{httpHandlers.HealthCheck()},
+			Checks:      []fthealth.Check{handler.HealthCheck()},
 		},
 		Timeout: 10 * time.Second,
 	}
@@ -111,23 +112,10 @@ func runServer(neoURL string, port string, cacheDuration string) {
 	http.HandleFunc(status.PingPathDW, status.PingHandler)
 	http.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
 	http.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
-	http.HandleFunc("/__gtg", status.NewGoodToGoHandler(httpHandlers.GTG))
-	http.Handle("/", r)
+	http.HandleFunc("/__gtg", status.NewGoodToGoHandler(handler.GTG))
+	http.Handle("/", router)
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatalf("Unable to start server: %v", err)
 	}
-}
-
-func router(hh httpHandlers) http.Handler {
-	servicesRouter := mux.NewRouter()
-
-	servicesRouter.HandleFunc("/sixdegrees/connectedPeople", hh.GetConnectedPeople).Methods("GET")
-	servicesRouter.HandleFunc("/sixdegrees/mostMentionedPeople", hh.GetMostMentionedPeople).Methods("GET")
-
-	var monitoringRouter http.Handler = servicesRouter
-	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
-	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
-
-	return monitoringRouter
 }
