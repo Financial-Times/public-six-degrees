@@ -54,10 +54,6 @@
   version = "1.0.3"
 
 [[constraint]]
-  name = "github.com/Financial-Times/people-rw-neo4j"
-  version = "2.0.2"
-
-[[constraint]]
   name = "github.com/Financial-Times/service-status-go"
   version = "0.1.0"
 
@@ -70,8 +66,9 @@
   version = "1.0.4"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/jmcvetta/neoism"
+  source = "github.com/Financial-Times/neoism"
+  version = "^2.0.0"
 
 [[constraint]]
   branch = "master"
