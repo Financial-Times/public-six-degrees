@@ -8,9 +8,9 @@ import (
 func (cd CypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, limit int) ([]Thing, bool, error) {
 	results := []neoMentionsReadStruct{}
 	query := &neoism.CypherQuery{
-		Statement: `MATCH (c:Content)-[a:MENTIONS]->(p:Person)
+		Statement: `MATCH (c:Content)-[a:MENTIONS]->(:Person)-[:EQUIVALENT_TO]->(p:Person)
 					WHERE c.publishedDateEpoch > {fromDateEpoch} AND c.publishedDateEpoch < {toDateEpoch}
-					WITH p.prefLabel as prefLabel, p.uuid as uuid,
+					WITH p.prefLabel as prefLabel, p.prefUUID as uuid,
 					COUNT(a) as mentions
 					RETURN uuid, prefLabel, mentions
 					ORDER BY mentions
