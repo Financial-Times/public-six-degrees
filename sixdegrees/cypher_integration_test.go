@@ -234,12 +234,12 @@ func getExpectedConnectedPeople() []ConnectedPerson {
 func getExpectedMostMentionedPeople() []Thing {
 	return []Thing{
 		{
-			ID:        fmt.Sprintf("http://api.ft.com/things/%s", personBorisJohnsonUUID),
-			PrefLabel: "Boris Johnson",
-		},
-		{
 			ID:        fmt.Sprintf("http://api.ft.com/things/%s", personSiobhanMordenUUID),
 			PrefLabel: "Siobhan Morden",
+		},
+		{
+			ID:        fmt.Sprintf("http://api.ft.com/things/%s", personBorisJohnsonUUID),
+			PrefLabel: "Boris Johnson",
 		},
 	}
 }
