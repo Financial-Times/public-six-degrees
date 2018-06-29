@@ -1,4 +1,4 @@
-package main
+package sixdegrees
 
 import (
 	"encoding/json"
@@ -51,7 +51,6 @@ func TestConnectedPeople(t *testing.T) {
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", contentUUID), t)
 	writeJsonToService(contentRW, fmt.Sprintf("./fixtures/Content-%s.json", content2UUID), t)
 
-
 	annotationsRW := annrw.NewCypherAnnotationsService(db)
 	require.NoError(t, annotationsRW.Initialise())
 	writeJSONToAnnotationsService(annotationsRW, contentUUID, fmt.Sprintf("./fixtures/Annotations-%s-v2.json", contentUUID), t)
@@ -97,7 +96,7 @@ func TestConnectedPeople(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		connectedPeople, found, err := cypherDriver{test.conn}.ConnectedPeople(test.uuid, test.fromDateEpoch, test.toDateEpoch, 1, 1, 5)
+		connectedPeople, found, err := CypherDriver{test.conn}.ConnectedPeople(test.uuid, test.fromDateEpoch, test.toDateEpoch, 1, 1, 5)
 		test.makeConnectedPeopleAssertions(t, connectedPeople, found, err, test.name)
 	}
 }
@@ -161,7 +160,7 @@ func TestMostMentionedPeople(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		thingList, found, err := cypherDriver{test.conn}.MostMentioned(test.fromDateEpoch, test.toDateEpoch, 5)
+		thingList, found, err := CypherDriver{test.conn}.MostMentioned(test.fromDateEpoch, test.toDateEpoch, 5)
 		test.makeMostMentionedPeopleAssertions(t, thingList, found, err, test.name)
 	}
 }

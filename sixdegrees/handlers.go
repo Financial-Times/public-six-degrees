@@ -1,4 +1,4 @@
-package main
+package sixdegrees
 
 import (
 	"encoding/json"
@@ -9,7 +9,11 @@ import (
 	"time"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
+	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/service-status-go/gtg"
+	status "github.com/Financial-Times/service-status-go/httphandlers"
+	"github.com/gorilla/mux"
+	metrics "github.com/rcrowley/go-metrics"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,12 +26,56 @@ const (
 
 type defaultTimeGetter func() time.Time
 
-type httpHandlers struct {
-	sixDegreesDriver   driver
+func NewHandler(driver Driver, cacheControlHeader string) *Handler {
+	return &Handler{
+		driver:             driver,
+		cacheControlHeader: cacheControlHeader,
+	}
+}
+
+type Handler struct {
+	driver             Driver
 	cacheControlHeader string
 }
 
-func (hh *httpHandlers) HealthCheck() fthealth.Check {
+func (hh *Handler) RegisterAdminHandlers(router *mux.Router, appSystemCode string, appName string, appDescription string, enableRequestLogging bool) http.Handler {
+	timedHC := fthealth.TimedHealthCheck{
+		HealthCheck: fthealth.HealthCheck{
+			SystemCode:  appSystemCode,
+			Name:        appName,
+			Description: appDescription,
+			Checks: []fthealth.Check{
+				hh.HealthCheck(),
+			},
+		},
+		Timeout: 10 * time.Second,
+	}
+	http.HandleFunc("/__health", fthealth.Handler(timedHC))
+	http.HandleFunc(status.PingPath, status.PingHandler)
+	http.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
+	http.HandleFunc("/__gtg", status.NewGoodToGoHandler(hh.GTG))
+
+	var monitoringRouter http.Handler = router
+	if enableRequestLogging {
+		monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
+	}
+	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
+
+	return monitoringRouter
+}
+
+func (hh *Handler) RegisterHandlers(router *mux.Router) http.Handler {
+	router.HandleFunc("/sixdegrees/connectedPeople", hh.GetConnectedPeople).Methods("GET")
+	router.HandleFunc("/sixdegrees/mostMentionedPeople", hh.GetMostMentionedPeople).Methods("GET")
+
+	var monitoringRouter http.Handler = router
+	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
+	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
+
+	return monitoringRouter
+}
+
+func (hh *Handler) HealthCheck() fthealth.Check {
 	return fthealth.Check{
 		BusinessImpact:   "Unable to respond to Public Six Degrees",
 		Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
@@ -38,15 +86,15 @@ func (hh *httpHandlers) HealthCheck() fthealth.Check {
 	}
 }
 
-func (hh *httpHandlers) Checker() (string, error) {
-	err := hh.sixDegreesDriver.CheckConnectivity()
+func (hh *Handler) Checker() (string, error) {
+	err := hh.driver.CheckConnectivity()
 	if err == nil {
 		return "Connectivity to neo4j is ok", err
 	}
 	return "Error connecting to neo4j", err
 }
 
-func (hh *httpHandlers) GTG() gtg.Status {
+func (hh *Handler) GTG() gtg.Status {
 	statusCheck := func() gtg.Status {
 		return gtgCheck(hh.Checker)
 	}
@@ -61,7 +109,7 @@ func gtgCheck(handler func() (string, error)) gtg.Status {
 	return gtg.Status{GoodToGo: true}
 }
 
-func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
+func (hh *Handler) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 	resultLimitParam := r.URL.Query().Get("limit")
 	fromDateParam := r.URL.Query().Get("fromDate")
 	toDateParam := r.URL.Query().Get("toDate")
@@ -86,7 +134,7 @@ func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	people, found, err := hh.sixDegreesDriver.MostMentioned(fromDate.Unix(), toDate.Unix(), limit)
+	people, found, err := hh.driver.MostMentioned(fromDate.Unix(), toDate.Unix(), limit)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -109,7 +157,7 @@ func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
+func (hh *Handler) GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	m, _ := url.ParseQuery(request.URL.RawQuery)
 
 	minimumConnectionsParam := m.Get("minimumConnections")
@@ -157,7 +205,7 @@ func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.
 		return
 	}
 
-	connectedPeople, found, err := hh.sixDegreesDriver.ConnectedPeople(uuid, fromDate.Unix(), toDate.Unix(), resultLimit, minimumConnections, contentLimit)
+	connectedPeople, found, err := hh.driver.ConnectedPeople(uuid, fromDate.Unix(), toDate.Unix(), resultLimit, minimumConnections, contentLimit)
 	if err != nil {
 		log.Errorf("ERROR - %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)

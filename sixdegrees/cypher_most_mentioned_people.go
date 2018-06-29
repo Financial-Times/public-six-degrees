@@ -1,11 +1,11 @@
-package main
+package sixdegrees
 
 import (
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	"github.com/jmcvetta/neoism"
 )
 
-func (cd cypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, limit int) ([]Thing, bool, error) {
+func (cd CypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, limit int) ([]Thing, bool, error) {
 	results := []neoMentionsReadStruct{}
 	query := &neoism.CypherQuery{
 		Statement: `MATCH (c:Content)-[a:MENTIONS]->(p:Person)

@@ -1,4 +1,4 @@
-package main
+package sixdegrees
 
 import (
 	"bytes"
@@ -194,7 +194,10 @@ func TestGetConnectedPeople(t *testing.T) {
 
 	for _, test := range tests {
 		rec := httptest.NewRecorder()
-		router(httpHandlers{test.driver, "max-age=360, public"}).ServeHTTP(rec, test.req)
+		router := mux.NewRouter()
+		handler := Handler{test.driver, "max-age=360, public"}
+		handler.RegisterHandlers(router)
+		router.ServeHTTP(rec, test.req)
 		assert.True(test.statusCode == rec.Code, fmt.Sprintf("%s: Wrong response code, was %d, should be %d", test.name, rec.Code, test.statusCode))
 		assert.JSONEq(test.body, rec.Body.String(), fmt.Sprintf("%s: Wrong body", test.name))
 		assert.Equal(test.expectedResultLimit, test.driver.argLimit, fmt.Sprintf("%s: Wrong limit", test.name))
@@ -313,7 +316,10 @@ func TestGetMostMentionedPeople(t *testing.T) {
 
 	for _, test := range tests {
 		rec := httptest.NewRecorder()
-		router(httpHandlers{test.driver, "max-age=360, public"}).ServeHTTP(rec, test.req)
+		router := mux.NewRouter()
+		handler := Handler{test.driver, "max-age=360, public"}
+		handler.RegisterHandlers(router)
+		router.ServeHTTP(rec, test.req)
 		assert.True(test.statusCode == rec.Code, fmt.Sprintf("%s: Wrong response code, was %d, should be %d", test.name, rec.Code, test.statusCode))
 		assert.JSONEq(test.body, rec.Body.String(), fmt.Sprintf("%s: Wrong body", test.name))
 		assert.Equal(test.expectedResultLimit, test.driver.argLimit, fmt.Sprintf("%s: Wrong limit", test.name))
@@ -398,7 +404,7 @@ func TestCheckConnectivity(t *testing.T) {
 	for _, test := range tests {
 		rec := httptest.NewRecorder()
 
-		httpHandler := httpHandlers{test.driver, "max-age=360, public"}
+		httpHandler := Handler{test.driver, "max-age=360, public"}
 		router := mux.NewRouter()
 
 		timedHC := fthealth.TimedHealthCheck{

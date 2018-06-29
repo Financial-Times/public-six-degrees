@@ -1,4 +1,4 @@
-package main
+package sixdegrees
 
 import (
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
@@ -17,7 +17,7 @@ type neoConnectedPeopleReadStruct struct {
 	ContentList []neoContentReadStruct `json:"contentList"`
 }
 
-func (cd cypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, resultLimit int, minimumConnections int, contentLimit int) ([]ConnectedPerson, bool, error) {
+func (cd CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, resultLimit int, minimumConnections int, contentLimit int) ([]ConnectedPerson, bool, error) {
 	results := []neoConnectedPeopleReadStruct{}
 
 	statement := `
