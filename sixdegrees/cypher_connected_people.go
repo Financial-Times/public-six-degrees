@@ -28,6 +28,12 @@ func (cd CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateE
 		MATCH (p:Person{prefUUID:{uuid}})<-[:EQUIVALENT_TO]-(:Person)<-[:MENTIONS]-(c)
 		MATCH (c)-[:MENTIONS]->(:Person)-[:EQUIVALENT_TO]->(p2:Person)
 		WITH
+			c,
+			p,
+			p2
+		ORDER BY
+			c.uuid DESC
+		WITH
 			p,
 			count(distinct(c)) as cm,
 			p2,
