@@ -208,7 +208,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context"]
-  revision = "4cb1c02c05b0e749b0365f61ae859a8e0cfceed9"
+  revision = "ed29d75add3d7c4bf7ca65aac0c6df3d1420216f"
 
 [[projects]]
   branch = "master"
@@ -234,6 +234,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6cec5873eafeb0f03e90e6c8452ec1bca004cf609d686c63b27e542b5913399d"
+  inputs-digest = "37a9175e5a5a23f38823720672b1de1ef7d79304cc63c85d53ed324e7a696761"
   solver-name = "gps-cdcl"
   solver-version = 1
