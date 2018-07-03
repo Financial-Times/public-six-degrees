@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  title: Public Annotations API
+  title: Public Six Degrees
   description: Provides a public API for retrieving most mentioned people and 
     connected people for the 'Six degrees' application.
   version: "2.0.0"
