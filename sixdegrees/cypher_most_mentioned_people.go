@@ -9,17 +9,31 @@ func (cd CypherDriver) MostMentioned(fromDateEpoch int64, toDateEpoch int64, lim
 	results := []neoMentionsReadStruct{}
 	query := &neoism.CypherQuery{
 		Statement: `MATCH (c:Content)-[a:MENTIONS]->(:Person)-[:EQUIVALENT_TO]->(p:Person)
-					WHERE c.publishedDateEpoch > {fromDateEpoch} AND c.publishedDateEpoch < {toDateEpoch}
-					WITH p.prefLabel as prefLabel, p.prefUUID as uuid,
-					COUNT(a) as mentions
-					RETURN uuid, prefLabel, mentions
-					ORDER BY mentions
-					DESC LIMIT {mentionsLimit}`,
-		Parameters: neoism.Props{"fromDateEpoch": fromDateEpoch, "toDateEpoch": toDateEpoch, "mentionsLimit": limit},
-		Result:     &results,
+					WHERE
+						c.publishedDateEpoch > {fromDateEpoch}
+						AND c.publishedDateEpoch < {toDateEpoch}
+					WITH
+						p.prefLabel as prefLabel,
+						p.prefUUID as uuid,
+						COUNT(a) as mentions
+					RETURN
+						uuid,
+						prefLabel,
+						mentions
+					ORDER BY
+						mentions DESC,
+						uuid ASC
+					LIMIT {mentionsLimit}`,
+		Parameters: neoism.Props{
+			"fromDateEpoch": fromDateEpoch,
+			"toDateEpoch":   toDateEpoch,
+			"mentionsLimit": limit,
+		},
+		Result: &results,
 	}
 
-	if err := cd.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 {
+	err := cd.conn.CypherBatch([]*neoism.CypherQuery{query})
+	if err != nil || len(results) == 0 {
 		return []Thing{}, false, err
 	}
 
