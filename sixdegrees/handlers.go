@@ -9,6 +9,7 @@ import (
 	"time"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
+	logger "github.com/Financial-Times/go-logger"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/service-status-go/gtg"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
@@ -57,7 +58,7 @@ func (hh *Handler) RegisterAdminHandlers(router *mux.Router, appSystemCode strin
 
 	var monitoringRouter http.Handler = router
 	if enableRequestLogging {
-		monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
+		monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(logger.Logger(), monitoringRouter)
 	}
 	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
 
@@ -69,7 +70,7 @@ func (hh *Handler) RegisterHandlers(router *mux.Router) http.Handler {
 	router.HandleFunc("/sixdegrees/mostMentionedPeople", hh.GetMostMentionedPeople).Methods("GET")
 
 	var monitoringRouter http.Handler = router
-	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
+	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(logger.Logger(), monitoringRouter)
 	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
 
 	return monitoringRouter
@@ -118,7 +119,7 @@ func (hh *Handler) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request
 
 	limit, err := getLimit(resultLimitParam, defaultMostMentionedPeopleResultLimit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get limit")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting limit query param, err=%v", err)})
 		w.Write([]byte(msg))
@@ -127,7 +128,7 @@ func (hh *Handler) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request
 
 	fromDate, toDate, err := getDateTimePeriod(fromDateParam, toDateParam)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get period")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting toDate or fromDate query params: fromDate=%s, toDate=%s", fromDateParam, toDateParam)})
 		w.Write([]byte(msg))
@@ -136,7 +137,7 @@ func (hh *Handler) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request
 
 	people, found, err := hh.driver.MostMentioned(fromDate.Unix(), toDate.Unix(), limit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not retrieve most mentioned people")
 		w.WriteHeader(http.StatusInternalServerError)
 		msg, _ := json.Marshal(ErrorMessage{"Error retrieving result from DB"})
 		w.Write([]byte(msg))
@@ -167,11 +168,13 @@ func (hh *Handler) GetConnectedPeople(w http.ResponseWriter, request *http.Reque
 	contentLimitParam := m.Get("contentLimit")
 	uuid := m.Get("uuid")
 
+	logger := logger.WithField("uuid", uuid)
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	fromDate, toDate, err := getDateTimePeriod(fromDateParam, toDateParam)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get period")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting toDate or fromDate query params: fromDate=%s, toDate=%s", fromDateParam, toDateParam)})
 		w.Write([]byte(msg))
@@ -180,7 +183,7 @@ func (hh *Handler) GetConnectedPeople(w http.ResponseWriter, request *http.Reque
 
 	minimumConnections, err := getLimit(minimumConnectionsParam, defaultMinConnections)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get minimum connections limit")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting minimumConnections query param, err=%v", err)})
 		w.Write([]byte(msg))
@@ -189,7 +192,7 @@ func (hh *Handler) GetConnectedPeople(w http.ResponseWriter, request *http.Reque
 
 	resultLimit, err := getLimit(resultLimitParam, defaultConnectedPeopleResultLimit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get result limit")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting limit query param, err=%v", err)})
 		w.Write([]byte(msg))
@@ -198,7 +201,7 @@ func (hh *Handler) GetConnectedPeople(w http.ResponseWriter, request *http.Reque
 
 	contentLimit, err := getLimit(contentLimitParam, defaultContentLimit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get content limit")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting contentLimit query param, err=%v", err)})
 		w.Write([]byte(msg))
@@ -207,7 +210,7 @@ func (hh *Handler) GetConnectedPeople(w http.ResponseWriter, request *http.Reque
 
 	connectedPeople, found, err := hh.driver.ConnectedPeople(uuid, fromDate.Unix(), toDate.Unix(), resultLimit, minimumConnections, contentLimit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not retrieve connected people")
 		w.WriteHeader(http.StatusInternalServerError)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error retrieving result for %s, err=%v", uuid, err)})
 		w.Write([]byte(msg))
