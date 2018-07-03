@@ -217,14 +217,14 @@ func getExpectedConnectedPeople() []ConnectedPerson {
 			Count: 2,
 			Content: []Content{
 				{
-					ID:     "a435b4ec-b207-4dce-ac0a-f8e7bbef310b",
-					APIURL: "http://api.ft.com/content/a435b4ec-b207-4dce-ac0a-f8e7bbef310b",
-					Title:  "Learn Golang",
-				},
-				{
 					ID:     "3fc9fe3e-af8c-4f7f-961a-e5065392bb31",
 					APIURL: "http://api.ft.com/content/3fc9fe3e-af8c-4f7f-961a-e5065392bb31",
 					Title:  "Bitcoin story makes Newsweek the headline",
+				},
+				{
+					ID:     "a435b4ec-b207-4dce-ac0a-f8e7bbef310b",
+					APIURL: "http://api.ft.com/content/a435b4ec-b207-4dce-ac0a-f8e7bbef310b",
+					Title:  "Learn Golang",
 				},
 			},
 		},

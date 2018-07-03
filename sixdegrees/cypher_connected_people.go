@@ -32,7 +32,7 @@ func (cd CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateE
 			p,
 			p2
 		ORDER BY
-			c.uuid DESC
+			c.uuid ASC
 		WITH
 			p,
 			count(distinct(c)) as cm,
