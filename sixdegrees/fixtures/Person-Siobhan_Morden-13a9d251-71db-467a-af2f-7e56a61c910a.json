@@ -1,5 +1,6 @@
 {
-  "uuid": "13a9d251-71db-467a-af2f-7e56a61c910a",
+  "type": "Person",
+  "prefUUID": "13a9d251-71db-467a-af2f-7e56a61c910a",
   "prefLabel": "Siobhan Morden",
   "salutation": "Ms.",
   "alternativeIdentifiers" : {
@@ -17,5 +18,16 @@
   "linkedinProfile": "the-linkedin-profile",
   "description": "Some text",
   "descriptionXML": "Some text containing <strong>markup</strong>",
-  "_imageUrl": "http://someimage.jpg"
+  "_imageUrl": "http://someimage.jpg",
+  "sourceRepresentations": [{
+    "type": "Person",
+    "uuid": "13a9d251-71db-467a-af2f-7e56a61c910a",
+    "prefLabel": "Siobhan Morden",
+    "authority": "Smartlogic",
+    "authorityValue": "13a9d251-71db-467a-af2f-7e56a61c910a",
+    "aliases": [
+      "Siobhan J Morden",
+      "Siobhan Morden"
+    ]
+  }]
 }

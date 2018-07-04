@@ -1,0 +1,193 @@
+swagger: "2.0"
+info:
+  title: Public Six Degrees
+  description: Provides a public API for retrieving most mentioned people and 
+    connected people for the 'Six degrees' application.
+  version: "2.0.0"
+  contact:
+    name: Universal Publishing
+    email: Universal.Publishing.Platform@ft.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+host: api.ft.com
+schemes:
+  - https
+basePath: /
+paths:
+  /sixdegrees/connectedPeople:
+    get:
+      description: Get connected people to a given person
+      tags:
+        - Public API
+      parameters:
+        - in: query
+          name: uuid
+          type: string
+          required: true
+          description: The given person's UUID we want to query
+        - in: query
+          name: minimumConnections
+          type: string
+          description: The minimum number of connections required for a 
+            connection to appear in 
+        - in: query
+          name: contentLimit
+          type: string
+          description: The maximum number of content returned for a mentioned 
+            connected person. 
+        - in: query
+          name: limit
+          type: string
+          description: The maximum number of resulting connected people. 
+            Defaults to 10 if not given
+        - in: query
+          name: fromDate
+          type: string
+          description: Start date, in YYYY-MM-DD format. 
+            Defaults to one week ago if not given
+        - in: query
+          name: toDate
+          type: string
+          description: End date, in YYYY-MM-DD format. 
+            Defaults to today if not given 
+      responses:
+        200:
+          description: Success body if the person is found.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RelatedContent"
+        400:
+          description: Bad request if the uuid path parameter is badly 
+            formed or missing.
+        404:
+          description: Not Found if there is no person record for the uuid 
+            path parameter is found.
+        500:
+          description: Internal Server Error if there was an issue 
+            processing the records.
+        503:
+          description: Service Unavailable if it cannot connect to Neo4j.
+  /sixdegrees/mostMentionedPeople:
+    get:
+      description: Get most mentioned people
+      tags:
+        - Public API
+      parameters:
+        - in: query
+          name: limit
+          type: string
+          description: The maximum number of resulting connected people. 
+            Defaults to 10 if not given.
+        - in: query
+          name: fromDate
+          type: string
+          description: Start date, in YYYY-MM-DD format. 
+            Defaults to one week ago if not given.
+        - in: query
+          name: toDate
+          type: string
+          description: End date, in YYYY-MM-DD format. Defaults to today if 
+            not given.
+      responses:
+        200:
+          description: Success body if the person is found.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Person"
+        400:
+          description: Bad request if the uuid path parameter is badly 
+            formed or missing.
+        404:
+          description: Not Found if there is no person record for the uuid 
+            path parameter is found.
+        500:
+          description: Internal Server Error if there was an issue 
+            processing the records.
+        503:
+          description: Service Unavailable if it cannot connect to Neo4j.
+  /__health:
+    get:
+      summary: Healthchecks
+      description: Runs application healthchecks and returns FT Healthcheck 
+        style json.
+      produces:
+        - application/json
+      tags:
+        - Health
+      responses:
+        200:
+          description: Should always return 200 along with the output of the 
+            healthchecks - regardless of whether the healthchecks failed or 
+            not. Please inspect the overall `ok` property to see whether or 
+            not the application is healthy.
+  /__build-info:
+    get:
+      summary: Build Information
+      description: Returns application build info, such as the git 
+        repository and revision, the golang version it was built with, and 
+        the app release version.
+      produces:
+       - application/json; charset=UTF-8
+      tags:
+        - Info
+      responses:
+        200:
+          description: Outputs build information as described in the summary.
+  /__gtg:
+    get:
+      summary: Good To Go
+      description: Lightly healthchecks the application, and returns a 200 
+        if it's Good-To-Go.
+      tags:
+        - Health
+      responses:
+        200:
+           description: The application is healthy enough to perform all its 
+            functions correctly - i.e. good to go.
+        503:
+           description: One or more of the applications healthchecks have 
+            failed, so please do not use the app. See the /__health endpoint 
+            for more detailed information.
+components:
+  schemas:
+    RelatedContent:
+      type: object
+      properties:
+        person:
+          $ref: "#/components/schemas/Person"
+        count:
+          type: integer
+          description: Number of total related content items
+        content:
+          type: array
+          items:
+            type: string
+          description: Types of the related object
+    Content:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the content
+        apiUrl:
+          type: string
+          description: URL of the content
+        title:
+          type: string
+          description: Title of the content
+    Person:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the person
+        prefLabel:
+          type: string
+          description: Name of the person

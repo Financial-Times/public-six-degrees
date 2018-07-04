@@ -1,5 +1,6 @@
 {
-  "uuid": "b30ec30e-83ca-4e4a-b82f-db6f7a0bb16d",
+  "prefUUID": "b30ec30e-83ca-4e4a-b82f-db6f7a0bb16d",
+  "type": "Person",
   "prefLabel": "Boris Johnson",
   "aliases": [
     "Alexander Boris de Pfeffel Johnson",
@@ -17,5 +18,16 @@
   "linkedinProfile": "the-linkedin-profile2",
   "description": "Some text2",
   "descriptionXML": "Some text containing <strong>markup</strong>2",
-  "_imageUrl": "http://someimage2.jpg"
+  "_imageUrl": "http://someimage2.jpg",
+  "sourceRepresentations": [{
+    "type": "Person",
+    "uuid": "b30ec30e-83ca-4e4a-b82f-db6f7a0bb16d",
+    "authority": "Smartlogic",
+    "authorityValue": "b30ec30e-83ca-4e4a-b82f-db6f7a0bb16d",
+    "prefLabel": "Boris Johnson",
+    "aliases": [
+      "Alexander Boris de Pfeffel Johnson",
+      "Boris Johnson"
+    ]
+  }]
 }

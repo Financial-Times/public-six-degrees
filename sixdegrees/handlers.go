@@ -1,4 +1,4 @@
-package main
+package sixdegrees
 
 import (
 	"encoding/json"
@@ -9,7 +9,12 @@ import (
 	"time"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
+	logger "github.com/Financial-Times/go-logger"
+	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/service-status-go/gtg"
+	status "github.com/Financial-Times/service-status-go/httphandlers"
+	"github.com/gorilla/mux"
+	metrics "github.com/rcrowley/go-metrics"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,12 +27,56 @@ const (
 
 type defaultTimeGetter func() time.Time
 
-type httpHandlers struct {
-	sixDegreesDriver   driver
+func NewHandler(driver Driver, cacheControlHeader string) *Handler {
+	return &Handler{
+		driver:             driver,
+		cacheControlHeader: cacheControlHeader,
+	}
+}
+
+type Handler struct {
+	driver             Driver
 	cacheControlHeader string
 }
 
-func (hh *httpHandlers) HealthCheck() fthealth.Check {
+func (hh *Handler) RegisterAdminHandlers(router *mux.Router, appSystemCode string, appName string, appDescription string, enableRequestLogging bool) http.Handler {
+	timedHC := fthealth.TimedHealthCheck{
+		HealthCheck: fthealth.HealthCheck{
+			SystemCode:  appSystemCode,
+			Name:        appName,
+			Description: appDescription,
+			Checks: []fthealth.Check{
+				hh.HealthCheck(),
+			},
+		},
+		Timeout: 10 * time.Second,
+	}
+	http.HandleFunc("/__health", fthealth.Handler(timedHC))
+	http.HandleFunc(status.PingPath, status.PingHandler)
+	http.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
+	http.HandleFunc("/__gtg", status.NewGoodToGoHandler(hh.GTG))
+
+	var monitoringRouter http.Handler = router
+	if enableRequestLogging {
+		monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(logger.Logger(), monitoringRouter)
+	}
+	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
+
+	return monitoringRouter
+}
+
+func (hh *Handler) RegisterHandlers(router *mux.Router) http.Handler {
+	router.HandleFunc("/sixdegrees/connectedPeople", hh.GetConnectedPeople).Methods("GET")
+	router.HandleFunc("/sixdegrees/mostMentionedPeople", hh.GetMostMentionedPeople).Methods("GET")
+
+	var monitoringRouter http.Handler = router
+	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(logger.Logger(), monitoringRouter)
+	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
+
+	return monitoringRouter
+}
+
+func (hh *Handler) HealthCheck() fthealth.Check {
 	return fthealth.Check{
 		BusinessImpact:   "Unable to respond to Public Six Degrees",
 		Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
@@ -38,15 +87,15 @@ func (hh *httpHandlers) HealthCheck() fthealth.Check {
 	}
 }
 
-func (hh *httpHandlers) Checker() (string, error) {
-	err := hh.sixDegreesDriver.CheckConnectivity()
+func (hh *Handler) Checker() (string, error) {
+	err := hh.driver.CheckConnectivity()
 	if err == nil {
 		return "Connectivity to neo4j is ok", err
 	}
 	return "Error connecting to neo4j", err
 }
 
-func (hh *httpHandlers) GTG() gtg.Status {
+func (hh *Handler) GTG() gtg.Status {
 	statusCheck := func() gtg.Status {
 		return gtgCheck(hh.Checker)
 	}
@@ -61,7 +110,7 @@ func gtgCheck(handler func() (string, error)) gtg.Status {
 	return gtg.Status{GoodToGo: true}
 }
 
-func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
+func (hh *Handler) GetMostMentionedPeople(w http.ResponseWriter, r *http.Request) {
 	resultLimitParam := r.URL.Query().Get("limit")
 	fromDateParam := r.URL.Query().Get("fromDate")
 	toDateParam := r.URL.Query().Get("toDate")
@@ -70,7 +119,7 @@ func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Re
 
 	limit, err := getLimit(resultLimitParam, defaultMostMentionedPeopleResultLimit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get limit")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting limit query param, err=%v", err)})
 		w.Write([]byte(msg))
@@ -79,16 +128,16 @@ func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Re
 
 	fromDate, toDate, err := getDateTimePeriod(fromDateParam, toDateParam)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get period")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting toDate or fromDate query params: fromDate=%s, toDate=%s", fromDateParam, toDateParam)})
 		w.Write([]byte(msg))
 		return
 	}
 
-	people, found, err := hh.sixDegreesDriver.MostMentioned(fromDate.Unix(), toDate.Unix(), limit)
+	people, found, err := hh.driver.MostMentioned(fromDate.Unix(), toDate.Unix(), limit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not retrieve most mentioned people")
 		w.WriteHeader(http.StatusInternalServerError)
 		msg, _ := json.Marshal(ErrorMessage{"Error retrieving result from DB"})
 		w.Write([]byte(msg))
@@ -109,7 +158,7 @@ func (hh *httpHandlers) GetMostMentionedPeople(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
+func (hh *Handler) GetConnectedPeople(w http.ResponseWriter, request *http.Request) {
 	m, _ := url.ParseQuery(request.URL.RawQuery)
 
 	minimumConnectionsParam := m.Get("minimumConnections")
@@ -119,11 +168,13 @@ func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.
 	contentLimitParam := m.Get("contentLimit")
 	uuid := m.Get("uuid")
 
+	logger := logger.WithField("uuid", uuid)
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	fromDate, toDate, err := getDateTimePeriod(fromDateParam, toDateParam)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get period")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting toDate or fromDate query params: fromDate=%s, toDate=%s", fromDateParam, toDateParam)})
 		w.Write([]byte(msg))
@@ -132,7 +183,7 @@ func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.
 
 	minimumConnections, err := getLimit(minimumConnectionsParam, defaultMinConnections)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get minimum connections limit")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting minimumConnections query param, err=%v", err)})
 		w.Write([]byte(msg))
@@ -141,7 +192,7 @@ func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.
 
 	resultLimit, err := getLimit(resultLimitParam, defaultConnectedPeopleResultLimit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get result limit")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting limit query param, err=%v", err)})
 		w.Write([]byte(msg))
@@ -150,16 +201,16 @@ func (hh *httpHandlers) GetConnectedPeople(w http.ResponseWriter, request *http.
 
 	contentLimit, err := getLimit(contentLimitParam, defaultContentLimit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not get content limit")
 		w.WriteHeader(http.StatusBadRequest)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error converting contentLimit query param, err=%v", err)})
 		w.Write([]byte(msg))
 		return
 	}
 
-	connectedPeople, found, err := hh.sixDegreesDriver.ConnectedPeople(uuid, fromDate.Unix(), toDate.Unix(), resultLimit, minimumConnections, contentLimit)
+	connectedPeople, found, err := hh.driver.ConnectedPeople(uuid, fromDate.Unix(), toDate.Unix(), resultLimit, minimumConnections, contentLimit)
 	if err != nil {
-		log.Errorf("ERROR - %v\n", err)
+		logger.WithError(err).Error("could not retrieve connected people")
 		w.WriteHeader(http.StatusInternalServerError)
 		msg, _ := json.Marshal(ErrorMessage{fmt.Sprintf("Error retrieving result for %s, err=%v", uuid, err)})
 		w.Write([]byte(msg))

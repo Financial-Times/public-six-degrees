@@ -1,4 +1,4 @@
-package main
+package sixdegrees
 
 import (
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
@@ -17,18 +17,46 @@ type neoConnectedPeopleReadStruct struct {
 	ContentList []neoContentReadStruct `json:"contentList"`
 }
 
-func (cd cypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, resultLimit int, minimumConnections int, contentLimit int) ([]ConnectedPerson, bool, error) {
+func (cd CypherDriver) ConnectedPeople(uuid string, fromDateEpoch int64, toDateEpoch int64, resultLimit int, minimumConnections int, contentLimit int) ([]ConnectedPerson, bool, error) {
 	results := []neoConnectedPeopleReadStruct{}
 
 	statement := `
-	MATCH (c:Content) where c.publishedDateEpoch < {toDate} and c.publishedDateEpoch > {fromDate}
-	WITH c
-	MATCH (p:Person{uuid:{uuid}})<-[:MENTIONS]-(c)-[:MENTIONS]->(p2:Person)
-	WITH p, count(distinct(c)) as cm, p2, collect({uuid: c.uuid, prefLabel: c.prefLabel})[0..{contentLimit}] as content
-	WHERE cm >= {minimumConnections}
-	WITH p2.uuid as uuid, p2.prefLabel as prefLabel, cm as count, content as contentList
-	RETURN prefLabel, uuid, count, contentList
-	ORDER BY count DESC LIMIT {limit}`
+		MATCH (c:Content)
+		WHERE
+			c.publishedDateEpoch < {toDate}
+			AND c.publishedDateEpoch > {fromDate}
+		MATCH (p:Person{prefUUID:{uuid}})<-[:EQUIVALENT_TO]-(:Person)<-[:MENTIONS]-(c)
+		MATCH (c)-[:MENTIONS]->(:Person)-[:EQUIVALENT_TO]->(p2:Person)
+		WITH
+			c,
+			p,
+			p2
+		ORDER BY
+			c.uuid ASC
+		WITH
+			p,
+			count(distinct(c)) as cm,
+			p2,
+			collect({
+				uuid: c.uuid,
+				prefLabel: c.prefLabel
+			})[0..{contentLimit}] as content
+		WHERE cm >= {minimumConnections}
+		WITH
+			p2.prefUUID as uuid,
+			p2.prefLabel as prefLabel,
+			cm as count,
+			content as contentList
+		RETURN
+			prefLabel,
+			uuid,
+			count,
+			contentList
+		ORDER BY
+			count DESC,
+			uuid ASC
+		LIMIT {limit}
+	`
 
 	query := &neoism.CypherQuery{
 		Statement: statement,

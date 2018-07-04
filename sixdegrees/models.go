@@ -1,4 +1,4 @@
-package main
+package sixdegrees
 
 type Thing struct {
 	ID        string `json:"id"`
