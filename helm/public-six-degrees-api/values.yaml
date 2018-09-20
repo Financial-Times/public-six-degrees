@@ -8,8 +8,6 @@ replicaCount: 2
 image:
   repository: coco/public-six-degrees
   pullPolicy: IfNotPresent
-env:
-  graphitePrefix: coco.services.k8s.public-six-degrees-api
 resources:
   requests:
     memory: 32Mi
